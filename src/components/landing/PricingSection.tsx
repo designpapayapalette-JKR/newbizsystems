@@ -8,7 +8,7 @@ export function PricingSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
-            NewBiz CRM — Beta Pricing
+            NewBiz CRM — Beta Pricing <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full ml-1">FREE for everyone</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Start free. Upgrade when ready.</h2>
           <p className="mt-3 text-gray-500 max-w-xl mx-auto">

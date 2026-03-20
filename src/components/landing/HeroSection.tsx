@@ -12,7 +12,7 @@ export function HeroSection() {
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 text-center">
         <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs sm:text-sm font-medium px-4 py-1.5 rounded-full mb-8">
           <FlaskConical className="h-3.5 w-3.5" />
-          Currently in Beta — Early access open now
+          Currently in Beta — <span className="text-white font-bold">FREE for everyone</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl lg:text-[64px] font-extrabold text-white leading-[1.08] mb-6 tracking-tight">
