@@ -238,6 +238,11 @@ export async function updateInvoice(id: string, data: Partial<InvoiceFormData>) 
     }
   }
 
+  if (Object.keys(invoiceUpdate).length > 0) {
+    const { error } = await supabase.from("invoices").update(invoiceUpdate).eq("id", id);
+    if (error) throw error;
+  }
+
   revalidatePath("/CRM/invoices");
   revalidatePath(`/CRM/invoices/${id}`);
 }
