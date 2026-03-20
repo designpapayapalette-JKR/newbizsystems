@@ -1,8 +1,16 @@
-export default function LeavesPage() {
+import { getLeaves } from "@/actions/hr_leaves";
+import { getEmployees } from "@/actions/hr_employees";
+import { LeaveManager } from "@/components/hr/LeaveManager";
+
+export default async function LeavesPage() {
+  const [leaves, employees] = await Promise.all([
+    getLeaves(),
+    getEmployees(),
+  ]);
+
   return (
-    <div className="bg-white rounded-xl border p-8 text-center">
-      <h2 className="text-xl font-bold text-gray-900 mb-2">Leave Management</h2>
-      <p className="text-gray-500">Coming soon — handle leave requests and approvals here.</p>
+    <div className="space-y-4">
+      <LeaveManager leaves={leaves} employees={employees} />
     </div>
   );
 }
