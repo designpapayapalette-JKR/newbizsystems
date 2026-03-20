@@ -67,12 +67,8 @@ export function Sidebar({ orgName, userFullName, userAvatarUrl, userRole, isSupe
   return (
     <div className="flex flex-col h-full bg-white border-r w-64 shrink-0">
       {/* Logo */}
-      <div className="flex items-center gap-3 p-4 border-b">
-        <img src="/logo-compact.png" alt={orgName} className="h-8 w-auto" />
-        <div className="min-w-0">
-          <p className="text-xs font-bold text-gray-900 truncate">{orgName}</p>
-          <p className="text-[10px] text-blue-600 font-semibold uppercase tracking-wider">ERP Platform</p>
-        </div>
+      <div className="flex items-center gap-2 p-4 border-b">
+        <img src="/logo-full.png" alt={orgName} className="h-8 w-auto min-w-[100px] max-w-[130px]" />
       </div>
 
       {/* Grouped Nav */}
