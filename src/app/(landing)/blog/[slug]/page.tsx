@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { Header } from "@/components/landing/Header";
+import { Footer } from "@/components/landing/Footer";
 
 interface BlogPost {
   title: string;
@@ -147,7 +149,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+      <Header />
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
         <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-blue-600 transition-colors mb-8 group">
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           Back to all articles
@@ -176,7 +179,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             Start Your Free Trial →
           </Link>
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }
