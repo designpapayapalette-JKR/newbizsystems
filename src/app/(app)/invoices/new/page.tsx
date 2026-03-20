@@ -21,10 +21,16 @@ export default async function NewInvoicePage({
 
   const { data: leads } = await supabase
     .from("leads")
-    .select("id, name, company")
+    .select("id, name, company, gstin, state, state_code")
     .eq("organization_id", profile.current_org_id)
     .eq("is_archived", false)
     .order("name");
+
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("id, name, gstin, state, state_code, currency")
+    .eq("id", profile.current_org_id)
+    .single();
 
   const backHref = sp.lead_id ? `/leads/${sp.lead_id}/invoices` : "/invoices";
 
@@ -36,7 +42,11 @@ export default async function NewInvoicePage({
           <ArrowLeft className="h-4 w-4" />
           Back
         </Link>
-        <InvoiceBuilder leads={leads ?? []} defaultLeadId={sp.lead_id} />
+        <InvoiceBuilder 
+          leads={leads ?? []} 
+          defaultLeadId={sp.lead_id} 
+          organization={org as any}
+        />
       </div>
     </div>
   );

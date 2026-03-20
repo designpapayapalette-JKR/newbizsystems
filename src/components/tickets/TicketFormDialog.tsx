@@ -22,9 +22,13 @@ import {
 } from "@/components/ui/select";
 import { createTicket } from "@/actions/tickets";
 import { toast } from "sonner";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, User } from "lucide-react";
 
-export function TicketFormDialog() {
+interface TicketFormDialogProps {
+  members: any[];
+}
+
+export function TicketFormDialog({ members }: TicketFormDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,10 +38,11 @@ export function TicketFormDialog() {
     priority: "medium",
     lead_id: "",
     sla_hours: "",
+    assigned_to: "",
   });
 
   function reset() {
-    setForm({ title: "", description: "", priority: "medium", lead_id: "", sla_hours: "" });
+    setForm({ title: "", description: "", priority: "medium", lead_id: "", sla_hours: "", assigned_to: "" });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -51,6 +56,7 @@ export function TicketFormDialog() {
         priority: form.priority,
         lead_id: form.lead_id.trim() || undefined,
         sla_hours: form.sla_hours ? Number(form.sla_hours) : undefined,
+        assigned_to: form.assigned_to || undefined,
       });
       toast.success("Ticket created");
       setOpen(false);
@@ -71,7 +77,7 @@ export function TicketFormDialog() {
           New Ticket
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>New Support Ticket</DialogTitle>
         </DialogHeader>
@@ -121,6 +127,27 @@ export function TicketFormDialog() {
               />
             </div>
           </div>
+          
+          <div className="space-y-2">
+            <Label>Assign To</Label>
+            <Select value={form.assigned_to} onValueChange={(v) => setForm({ ...form, assigned_to: v })}>
+              <SelectTrigger>
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <SelectValue placeholder="Unassigned" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {members.map((m) => (
+                  <SelectItem key={m.user_id} value={m.user_id}>
+                    {m.profile?.full_name || m.profile?.email || "Team Member"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label>Lead ID (optional)</Label>
             <Input

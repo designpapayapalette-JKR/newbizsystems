@@ -11,10 +11,10 @@ interface TopBarProps {
 
 export function TopBar({ title, subtitle, actions }: TopBarProps) {
   return (
-    <header className="flex items-center justify-between h-14 px-4 border-b bg-white shrink-0">
+    <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 md:px-8 py-5 border-b bg-background/80 backdrop-blur-md sticky top-0 z-30">
       <div>
-        <h1 className="text-base font-semibold leading-tight">{title}</h1>
-        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+        <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+        {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
       </div>
       <div className="flex items-center gap-2">
         {actions}

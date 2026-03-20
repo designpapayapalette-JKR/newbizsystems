@@ -59,7 +59,7 @@ function downloadTemplate(stages: PipelineStage[]) {
 
   // --- Instructions sheet ---
   const instructions = [
-    ["BizCRM — Lead Import Template Instructions"],
+    ["NewBiz CRM — Lead Import Template Instructions"],
     [""],
     ["Sheet: Leads"],
     ["  Row 1: Column headers (do not modify)"],

@@ -67,6 +67,9 @@ export async function updateOrganization(id: string, data: {
   website?: string;
   invoice_color?: string;
   invoice_footer?: string;
+  invoice_template?: string;
+  state?: string;
+  state_code?: string;
   gstin?: string;
   tax_label?: string;
   pan?: string;

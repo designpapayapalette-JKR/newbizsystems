@@ -9,11 +9,16 @@ import { addTicketComment } from "@/actions/tickets";
 import { toast } from "sonner";
 import { Loader2, Send } from "lucide-react";
 
+import { TicketMacro } from "@/actions/macros";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Zap } from "lucide-react";
+
 interface TicketCommentFormProps {
   ticketId: string;
+  macros: TicketMacro[];
 }
 
-export function TicketCommentForm({ ticketId }: TicketCommentFormProps) {
+export function TicketCommentForm({ ticketId, macros }: TicketCommentFormProps) {
   const router = useRouter();
   const [body, setBody] = useState("");
   const [isInternal, setIsInternal] = useState(false);
@@ -38,11 +43,32 @@ export function TicketCommentForm({ ticketId }: TicketCommentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      {macros.length > 0 && (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+                <Zap className="h-3 w-3 text-amber-500" /> Apply Macro
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              {macros.map((macro) => (
+                <DropdownMenuItem
+                  key={macro.id}
+                  onClick={() => setBody((prev) => (prev ? prev + "\n\n" : "") + macro.content_template)}
+                >
+                  {macro.title}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
       <Textarea
         placeholder={isInternal ? "Write an internal note (not visible to customer)..." : "Write a reply..."}
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        rows={3}
+        rows={4}
         className={isInternal ? "bg-amber-50 border-amber-200" : ""}
       />
       <div className="flex items-center justify-between">

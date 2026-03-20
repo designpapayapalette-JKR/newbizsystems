@@ -17,9 +17,36 @@ interface LineItem {
   hsn_sac: string;
   quantity: number;
   unit_price: number;
+  tax_rate: number;
 }
 
-export function InvoiceBuilder({ leads, defaultLeadId }: { leads: { id: string; name: string; company: string | null }[]; defaultLeadId?: string }) {
+interface Org {
+  id: string;
+  name: string;
+  gstin?: string;
+  state?: string;
+  state_code?: string;
+  currency?: string;
+}
+
+interface Lead {
+  id: string;
+  name: string;
+  company: string | null;
+  gstin?: string;
+  state?: string;
+  state_code?: string;
+}
+
+export function InvoiceBuilder({ 
+  leads, 
+  defaultLeadId,
+  organization: org
+}: { 
+  leads: Lead[]; 
+  defaultLeadId?: string;
+  organization?: Org;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [leadId, setLeadId] = useState(defaultLeadId ?? "");
@@ -27,14 +54,45 @@ export function InvoiceBuilder({ leads, defaultLeadId }: { leads: { id: string; 
   const [issueDate, setIssueDate] = useState(new Date().toISOString().slice(0, 10));
   const [dueDate, setDueDate] = useState("");
   const [discount, setDiscount] = useState("0");
-  const [taxPercent, setTaxPercent] = useState("0");
   const [notes, setNotes] = useState("");
   const [terms, setTerms] = useState("Payment due within 30 days of invoice date.");
-  const [currency, setCurrency] = useState("INR");
-  const [items, setItems] = useState<LineItem[]>([{ description: "", hsn_sac: "", quantity: 1, unit_price: 0 }]);
+  const [currency, setCurrency] = useState(org?.currency ?? "INR");
+  const [items, setItems] = useState<LineItem[]>([{ description: "", hsn_sac: "", quantity: 1, unit_price: 0, tax_rate: 18 }]);
+
+  const selectedLead = leads.find(l => l.id === leadId);
+
+  const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
+  const discountAmt = parseFloat(discount) || 0;
+  
+  // Real-time GST Calculation (Aggregated from line items)
+  let totalTaxAmt = 0;
+  let totalCgst = 0, totalSgst = 0, totalIgst = 0;
+
+  items.forEach(item => {
+    const itemSubtotal = item.quantity * item.unit_price;
+    const itemDiscount = subtotal > 0 ? (itemSubtotal / subtotal) * discountAmt : 0;
+    const itemTaxableValue = itemSubtotal - itemDiscount;
+    const itemTax = (itemTaxableValue * (item.tax_rate || 0)) / 100;
+
+    totalTaxAmt += itemTax;
+
+    if (currency === "INR" && itemTax > 0) {
+      const isIntraState = org?.state_code === selectedLead?.state_code;
+      if (isIntraState) {
+        totalCgst += itemTax / 2;
+        totalSgst += itemTax / 2;
+      } else {
+        totalIgst += itemTax;
+      }
+    }
+  });
+
+  const total = (subtotal - discountAmt) + totalTaxAmt;
+
+  const isGSTMissing = currency === "INR" && (!org?.gstin || (leadId && !selectedLead?.gstin));
 
   function addItem() {
-    setItems([...items, { description: "", hsn_sac: "", quantity: 1, unit_price: 0 }]);
+    setItems([...items, { description: "", hsn_sac: "", quantity: 1, unit_price: 0, tax_rate: 18 }]);
   }
 
   function removeItem(i: number) {
@@ -45,15 +103,14 @@ export function InvoiceBuilder({ leads, defaultLeadId }: { leads: { id: string; 
     setItems(items.map((item, idx) => idx === i ? { ...item, [field]: value } : item));
   }
 
-  const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
-  const discountAmt = parseFloat(discount) || 0;
-  const taxAmt = ((subtotal - discountAmt) * (parseFloat(taxPercent) || 0)) / 100;
-  const total = subtotal - discountAmt + taxAmt;
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (items.every((i) => !i.description.trim())) {
       toast.error("Add at least one line item");
+      return;
+    }
+    if (isGSTMissing) {
+      toast.error("GST details missing. Both parties must have GSTIN for INR invoices.");
       return;
     }
     setLoading(true);
@@ -64,7 +121,6 @@ export function InvoiceBuilder({ leads, defaultLeadId }: { leads: { id: string; 
         issue_date: issueDate,
         due_date: dueDate || undefined,
         discount: discountAmt,
-        tax_percent: parseFloat(taxPercent) || 0,
         notes: notes || undefined,
         terms: terms || undefined,
         currency,
@@ -72,15 +128,30 @@ export function InvoiceBuilder({ leads, defaultLeadId }: { leads: { id: string; 
       });
       toast.success("Invoice created!");
       router.push(`/invoices/${invoice.id}`);
-    } catch {
-      toast.error("Failed to create invoice");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create invoice");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
+      {/* GST Validation Warning */}
+      {isGSTMissing && (
+        <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex gap-3 text-amber-800 text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <div>
+            <p className="font-bold">GST Compliance Required</p>
+            <p className="mt-0.5 opacity-90">
+              For INR invoices, Indian guidelines require GSTIN for both parties. 
+              {!org?.gstin && <span> Please update your <strong>organization GSTIN</strong> in Settings.</span>}
+              {leadId && !selectedLead?.gstin && <span> Please update the <strong>lead/client details</strong> with their GSTIN.</span>}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <Card>
         <CardHeader><CardTitle className="text-base">Invoice Details</CardTitle></CardHeader>
@@ -135,10 +206,10 @@ export function InvoiceBuilder({ leads, defaultLeadId }: { leads: { id: string; 
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {/* Header row */}
           <div className="hidden sm:grid grid-cols-12 gap-2 text-xs text-muted-foreground font-medium px-1">
-            <span className="col-span-4">Description</span>
+            <span className="col-span-3">Description</span>
             <span className="col-span-2">HSN / SAC</span>
+            <span className="col-span-1 text-center">GST %</span>
             <span className="col-span-2 text-right">Qty</span>
             <span className="col-span-2 text-right">Unit Price</span>
             <span className="col-span-2 text-right">Amount</span>
@@ -146,7 +217,7 @@ export function InvoiceBuilder({ leads, defaultLeadId }: { leads: { id: string; 
 
           {items.map((item, i) => (
             <div key={i} className="grid grid-cols-12 gap-2 items-start">
-              <div className="col-span-12 sm:col-span-4">
+              <div className="col-span-12 sm:col-span-3">
                 <Input
                   placeholder="Product / Service name"
                   value={item.description}
@@ -154,11 +225,23 @@ export function InvoiceBuilder({ leads, defaultLeadId }: { leads: { id: string; 
                   required={i === 0}
                 />
               </div>
-              <div className="col-span-6 sm:col-span-2">
+              <div className="col-span-4 sm:col-span-2">
                 <Input
-                  placeholder="e.g. 998314"
+                  placeholder="HSN/SAC"
                   value={item.hsn_sac}
                   onChange={(e) => updateItem(i, "hsn_sac", e.target.value)}
+                />
+              </div>
+              <div className="col-span-2 sm:col-span-1">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  placeholder="%"
+                  value={item.tax_rate}
+                  onChange={(e) => updateItem(i, "tax_rate", parseFloat(e.target.value) || 0)}
+                  className="px-1 text-center"
                 />
               </div>
               <div className="col-span-3 sm:col-span-2">
@@ -198,23 +281,46 @@ export function InvoiceBuilder({ leads, defaultLeadId }: { leads: { id: string; 
               <span className="text-muted-foreground">Subtotal</span>
               <span>{formatCurrency(subtotal, currency)}</span>
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Discount</span>
-                <Input type="number" min="0" step="0.01" className="h-7 w-24 text-sm" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+            {discountAmt > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Discount</span>
+                <span>- {formatCurrency(discountAmt, currency)}</span>
               </div>
-              <span className="text-sm">- {formatCurrency(discountAmt, currency)}</span>
+            )}
+            
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Total Tax / GST</span>
+              <span>+ {formatCurrency(totalTaxAmt, currency)}</span>
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Tax %</span>
-                <Input type="number" min="0" max="100" step="0.1" className="h-7 w-20 text-sm" value={taxPercent} onChange={(e) => setTaxPercent(e.target.value)} />
+
+            {/* GST Breakdown */}
+            {currency === "INR" && totalTaxAmt > 0 && (
+              <div className="bg-gray-50 rounded-lg p-2 mt-2 space-y-1 border border-gray-100">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 px-1">GST Breakdown ({org?.state_code === selectedLead?.state_code ? "Intra-state" : "Inter-state"})</div>
+                {totalCgst > 0 && (
+                  <div className="flex justify-between text-[12px] px-1">
+                    <span className="text-muted-foreground">CGST</span>
+                    <span className="font-medium">{formatCurrency(totalCgst, currency)}</span>
+                  </div>
+                )}
+                {totalSgst > 0 && (
+                  <div className="flex justify-between text-[12px] px-1">
+                    <span className="text-muted-foreground">SGST</span>
+                    <span className="font-medium">{formatCurrency(totalSgst, currency)}</span>
+                  </div>
+                )}
+                {totalIgst > 0 && (
+                  <div className="flex justify-between text-[12px] px-1">
+                    <span className="text-muted-foreground">IGST</span>
+                    <span className="font-medium">{formatCurrency(totalIgst, currency)}</span>
+                  </div>
+                )}
               </div>
-              <span className="text-sm">+ {formatCurrency(taxAmt, currency)}</span>
-            </div>
-            <div className="flex justify-between font-semibold text-base pt-1 border-t">
-              <span>Total</span>
-              <span>{formatCurrency(total, currency)}</span>
+            )}
+
+            <div className="flex justify-between font-bold text-lg pt-1.5 border-t border-gray-200 mt-2">
+              <span>Total Amount</span>
+              <span className="text-primary">{formatCurrency(total, currency)}</span>
             </div>
           </div>
         </CardContent>

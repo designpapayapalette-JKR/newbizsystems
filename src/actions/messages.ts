@@ -122,13 +122,28 @@ export async function ensureAllMemberDMs(orgId: string): Promise<void> {
 }
 
 /** Send a message to a channel */
-export async function sendMessage(channelId: string, content: string) {
+export async function sendMessage(
+  channelId: string,
+  content: string,
+  fileData?: { fileUrl: string; fileName: string; fileType: string; fileSize: number }
+) {
   const supabase = await createClient();
   const { userId } = await getOrgId();
 
+  const insertData: any = { channel_id: channelId, sender_id: userId };
+  if (content.trim()) {
+    insertData.content = content.trim();
+  }
+  if (fileData) {
+    insertData.file_url = fileData.fileUrl;
+    insertData.file_name = fileData.fileName;
+    insertData.file_type = fileData.fileType;
+    insertData.file_size = fileData.fileSize;
+  }
+
   const { error } = await supabase
     .from("messages")
-    .insert({ channel_id: channelId, sender_id: userId, content: content.trim() });
+    .insert(insertData);
 
   if (error) throw error;
 }
@@ -139,7 +154,7 @@ export async function getMessages(channelId: string, limit = 60) {
 
   const { data, error } = await supabase
     .from("messages")
-    .select("id, content, created_at, sender_id")
+    .select("id, content, created_at, sender_id, file_url, file_name, file_type, file_size")
     .eq("channel_id", channelId)
     .order("created_at", { ascending: false })
     .limit(limit);

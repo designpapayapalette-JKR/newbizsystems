@@ -26,13 +26,13 @@ export function StatsCards({ totalLeads, activeLeads, pipelineValue, overduePaym
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (
-          <Card key={stat.label}>
-            <CardContent className="p-4">
-              <div className={`inline-flex items-center justify-center w-8 h-8 rounded-lg ${stat.bg} mb-2`}>
-                <Icon className={`h-4 w-4 ${stat.color}`} />
+          <Card key={stat.label} className="overflow-hidden group">
+            <CardContent className="p-5 flex flex-col items-start relative">
+              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl ${stat.bg} mb-4 transition-transform group-hover:scale-110`}>
+                <Icon className={`h-5 w-5 ${stat.color}`} />
               </div>
-              <div className="text-xl font-bold">{stat.value}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{stat.label}</div>
+              <div className="text-2xl font-bold text-foreground tracking-tight">{stat.value}</div>
+              <div className="text-sm text-muted-foreground font-medium mt-1">{stat.label}</div>
             </CardContent>
           </Card>
         );

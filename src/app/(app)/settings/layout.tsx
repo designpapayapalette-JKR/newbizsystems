@@ -6,6 +6,8 @@ const settingsNav = [
   { href: "/settings/team", label: "Team" },
   { href: "/settings/billing", label: "Billing & Plan" },
   { href: "/settings/pipeline", label: "Pipeline Stages" },
+  { href: "/settings/knowledge-base", label: "Knowledge Base" },
+  { href: "/settings/support", label: "Help Center / Support" },
   { href: "/settings/notifications", label: "Notifications" },
   { href: "/settings/products", label: "Products & Services" },
   { href: "/settings/templates", label: "Email Templates" },

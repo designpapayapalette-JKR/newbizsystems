@@ -109,7 +109,7 @@ export default function NotificationsPage() {
             <Bell className="h-4 w-4" /> Browser Push Notifications
           </CardTitle>
           <CardDescription>
-            Get notified when reminders are due, even when BizCRM isn&apos;t open.
+            Get notified when reminders are due, even when NewBiz CRM isn&apos;t open.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -1,12 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { getTicketById } from "@/actions/tickets";
+import { getMacros } from "@/actions/macros";
+import { getTeamMembers } from "@/actions/team";
 import { TopBar } from "@/components/layout/TopBar";
 import { TicketStatusSelect } from "@/components/tickets/TicketStatusSelect";
+import { TicketAssignSelect } from "@/components/tickets/TicketAssignSelect";
 import { TicketCommentForm } from "@/components/tickets/TicketCommentForm";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ClockAlert } from "lucide-react";
 import Link from "next/link";
 import type { TicketStatus } from "@/types";
 
@@ -27,6 +30,15 @@ function formatDate(dateStr: string) {
   });
 }
 
+function getSlaStatus(dueDate: string | null) {
+  if (!dueDate) return null;
+  const dueTime = new Date(dueDate).getTime();
+  const now = Date.now();
+  if (dueTime < now) return { label: "Breached", class: "bg-red-100 text-red-800 border-red-200" };
+  if (dueTime < now + 2 * 3600000) return { label: "At Risk", class: "bg-orange-100 text-orange-800 border-orange-200" };
+  return { label: "On Track", class: "bg-green-100 text-green-800 border-green-200" };
+}
+
 export default async function TicketDetailPage({
   params,
 }: {
@@ -43,7 +55,10 @@ export default async function TicketDetailPage({
   const ticket = await getTicketById(id).catch(() => null);
   if (!ticket) notFound();
 
+  const members = await getTeamMembers(profile.current_org_id).catch(() => []);
+  const macros = await getMacros().catch(() => []);
   const comments = (ticket as any).comments ?? [];
+  const slaStatus = getSlaStatus(ticket.sla_due_at);
 
   return (
     <div className="flex flex-col h-full">
@@ -77,6 +92,16 @@ export default async function TicketDetailPage({
                   />
                 </div>
 
+                {/* Assignee selector */}
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground font-medium">Assignee</p>
+                  <TicketAssignSelect
+                    ticketId={ticket.id}
+                    currentAssigneeId={ticket.assigned_to}
+                    members={members}
+                  />
+                </div>
+
                 {/* Priority */}
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground font-medium">Priority</p>
@@ -105,7 +130,15 @@ export default async function TicketDetailPage({
                 {ticket.sla_due_at && (
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground font-medium">SLA Due</p>
-                    <p className="text-sm">{formatDate(ticket.sla_due_at)}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm">{formatDate(ticket.sla_due_at)}</p>
+                      {slaStatus && (
+                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 flex gap-1 ${slaStatus.class}`}>
+                          {slaStatus.label === "Breached" || slaStatus.label === "At Risk" ? <ClockAlert className="h-3 w-3" /> : null}
+                          {slaStatus.label}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -113,7 +146,7 @@ export default async function TicketDetailPage({
                 {ticket.description && (
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground font-medium">Description</p>
-                    <p className="text-sm whitespace-pre-wrap">{ticket.description}</p>
+                    <div className="text-sm whitespace-pre-wrap bg-muted/40 p-3 rounded-md border">{ticket.description}</div>
                   </div>
                 )}
 
@@ -127,30 +160,30 @@ export default async function TicketDetailPage({
           {/* Right panel: comment thread */}
           <div className="lg:col-span-2">
             <Card>
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 border-b mb-4">
                 <CardTitle className="text-base">
-                  Comments ({comments.length})
+                  Ticket Thread ({comments.length})
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 pt-0">
                 {/* Existing comments */}
                 {comments.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No comments yet. Be the first to reply.
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    No replies yet. Be the first to start the conversation.
                   </p>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {comments.map((comment: any) => (
                       <div
                         key={comment.id}
-                        className={`rounded-lg p-3 text-sm ${
+                        className={`rounded-xl p-4 text-sm ${
                           comment.is_internal
-                            ? "bg-amber-50 border border-amber-200"
-                            : "bg-gray-50 border"
+                            ? "bg-amber-50 border border-amber-200 shadow-sm"
+                            : "bg-muted/30 border shadow-sm"
                         }`}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-xs">
+                        <div className="flex items-center justify-between mb-2 pb-2 border-b border-border/50">
+                          <span className="font-semibold text-sm text-foreground">
                             {comment.user_profile?.full_name ?? "Unknown"}
                           </span>
                           <div className="flex items-center gap-2">
@@ -159,7 +192,7 @@ export default async function TicketDetailPage({
                                 variant="outline"
                                 className="text-xs bg-amber-100 text-amber-700 border-amber-200"
                               >
-                                Internal
+                                Internal Note
                               </Badge>
                             )}
                             <span className="text-xs text-muted-foreground">
@@ -167,16 +200,16 @@ export default async function TicketDetailPage({
                             </span>
                           </div>
                         </div>
-                        <p className="whitespace-pre-wrap">{comment.body}</p>
+                        <p className="whitespace-pre-wrap leading-relaxed">{comment.body}</p>
                       </div>
                     ))}
                   </div>
                 )}
 
                 {/* Reply form */}
-                <div className="border-t pt-4">
-                  <p className="text-xs font-medium text-muted-foreground mb-3">Add Reply</p>
-                  <TicketCommentForm ticketId={ticket.id} />
+                <div className="border-t pt-6 mt-4">
+                  <p className="text-sm font-semibold text-foreground mb-3">Add Note or Reply</p>
+                  <TicketCommentForm ticketId={ticket.id} macros={macros} />
                 </div>
               </CardContent>
             </Card>

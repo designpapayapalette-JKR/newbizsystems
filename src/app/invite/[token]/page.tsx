@@ -211,7 +211,7 @@ export default function InvitePage() {
           <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-xl mb-3">
             <Users className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-xl font-bold">You&apos;ve been invited to BizCRM</h1>
+          <h1 className="text-xl font-bold">You&apos;ve been invited to NewBiz CRM</h1>
           <p className="text-sm text-muted-foreground mt-1">Sign in or create an account to join your team</p>
         </div>
 
@@ -240,7 +240,7 @@ export default function InvitePage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Sign in to accept</CardTitle>
-              <CardDescription>Use your existing BizCRM account</CardDescription>
+              <CardDescription>Use your existing NewBiz CRM account</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSignIn} className="space-y-4">
@@ -269,7 +269,7 @@ export default function InvitePage() {
             <CardHeader>
               <CardTitle className="text-base">Create your account</CardTitle>
               <CardDescription>
-                New to BizCRM? Create an account to join your team.
+                New to NewBiz CRM? Create an account to join your team.
               </CardDescription>
             </CardHeader>
             <CardContent>

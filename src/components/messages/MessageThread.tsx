@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { getInitials, formatDateTime, cn } from "@/lib/utils";
-import { Send, Hash, MessageCircle } from "lucide-react";
+import { Send, Hash, MessageCircle, Paperclip, FileText, X } from "lucide-react";
 
 interface Message {
   id: string;
@@ -14,6 +14,10 @@ interface Message {
   created_at: string;
   sender_id: string;
   sender: { full_name?: string | null; avatar_url?: string | null } | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  file_type?: string | null;
+  file_size?: number | null;
 }
 
 interface Channel {
@@ -34,8 +38,11 @@ export function MessageThread({ channel, initialMessages, currentUserId, current
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -62,7 +69,7 @@ export function MessageThread({ channel, initialMessages, currentUserId, current
           filter: `channel_id=eq.${channel.id}`,
         },
         async (payload) => {
-          const newMsg = payload.new as { id: string; content: string; created_at: string; sender_id: string };
+          const newMsg = payload.new as Message;
 
           // Fetch sender profile
           const { data: profile } = await supabase
@@ -85,31 +92,85 @@ export function MessageThread({ channel, initialMessages, currentUserId, current
 
   async function handleSend() {
     const trimmed = text.trim();
-    if (!trimmed || sending) return;
-
-    // Optimistic update
-    const optimisticId = `opt-${Date.now()}`;
-    const optimistic: Message = {
-      id: optimisticId,
-      content: trimmed,
-      created_at: new Date().toISOString(),
-      sender_id: currentUserId,
-      sender: { full_name: currentUserName },
-    };
-    setMessages((prev) => [...prev, optimistic]);
-    setText("");
-    textareaRef.current?.focus();
+    if ((!trimmed && !file) || sending || uploading) return;
 
     setSending(true);
+    if (file) setUploading(true);
+
+    let fileData = undefined;
+
     try {
-      await sendMessage(channel.id, trimmed);
-    } catch {
-      // Remove optimistic on failure
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
-      setText(trimmed);
+      if (file) {
+        const supabase = createClient();
+        const ext = file.name.split('.').pop() || '';
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
+        const filePath = `${channel.id}/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from("message_attachments")
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("message_attachments")
+          .getPublicUrl(filePath);
+
+        fileData = {
+          fileUrl: publicUrl,
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+        };
+      }
+
+      // Optimistic update
+      const optimisticId = `opt-${Date.now()}`;
+      const optimistic: Message = {
+        id: optimisticId,
+        content: trimmed,
+        created_at: new Date().toISOString(),
+        sender_id: currentUserId,
+        sender: { full_name: currentUserName },
+        file_url: fileData?.fileUrl,
+        file_name: fileData?.fileName,
+        file_type: fileData?.fileType,
+        file_size: fileData?.fileSize,
+      };
+      setMessages((prev) => [...prev, optimistic]);
+      setText("");
+      setFile(null);
+      textareaRef.current?.focus();
+
+      await sendMessage(channel.id, trimmed, fileData);
+    } catch (e) {
+      console.error(e);
+      // Remove optimistic on failure could be tricky with files, we just alert
+      alert("Failed to send message/attachment");
     } finally {
       setSending(false);
+      setUploading(false);
     }
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+    
+    if (selected.size > 10 * 1024 * 1024) { // 10MB limit
+      alert("File is too large. Max size is 10MB");
+      return;
+    }
+    setFile(selected);
+  }
+
+  function formatBytes(bytes: number, decimals = 2) {
+    if (!+bytes) return '0 Bytes'
+    const k = 1024
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -197,6 +258,23 @@ export function MessageThread({ channel, initialMessages, currentUserId, current
                           : "bg-white border text-foreground rounded-tl-sm shadow-sm"
                       )}
                     >
+                      {msg.file_url && (
+                        <div className={cn("mb-2", (msg.content && msg.content.trim()) ? "mb-2" : "mb-0")}>
+                          {msg.file_type?.startsWith('image/') ? (
+                            <a href={msg.file_url} target="_blank" rel="noopener noreferrer">
+                              <img src={msg.file_url} alt={msg.file_name || "Attachment"} className="max-w-[200px] max-h-[200px] object-cover rounded-md" />
+                            </a>
+                          ) : (
+                            <a href={msg.file_url} target="_blank" rel="noopener noreferrer" className={cn("flex items-center gap-2 p-2 rounded-md border", isMine ? "bg-primary-foreground/10 border-primary-foreground/20 text-white" : "bg-gray-50 text-gray-900")}>
+                               <FileText className="h-5 w-5 shrink-0" />
+                               <div className="flex flex-col overflow-hidden">
+                                 <span className="truncate text-sm font-medium">{msg.file_name}</span>
+                                 <span className="text-xs opacity-70">{msg.file_size ? formatBytes(msg.file_size) : 'Unknown size'}</span>
+                               </div>
+                            </a>
+                          )}
+                        </div>
+                      )}
                       {msg.content}
                     </div>
                     {mi === group.msgs.length - 1 && (
@@ -215,7 +293,32 @@ export function MessageThread({ channel, initialMessages, currentUserId, current
 
       {/* Input */}
       <div className="px-4 py-3 border-t bg-white shrink-0">
+        {file && (
+          <div className="flex items-center gap-2 mb-2 p-2 relative rounded-md bg-gray-50 border w-max">
+             <FileText className="h-4 w-4 text-muted-foreground" />
+             <span className="text-xs max-w-[200px] truncate text-gray-800">{file.name}</span>
+             <button onClick={() => setFile(null)} className="p-1 hover:bg-gray-200 rounded-full text-gray-600">
+                <X className="h-3 w-3" />
+             </button>
+          </div>
+        )}
         <div className="flex gap-2 items-end">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            className="hidden" 
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={sending || uploading}
+            className="shrink-0 h-10 w-10 text-muted-foreground mr-1"
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
           <Textarea
             ref={textareaRef}
             placeholder={`Message ${channel.type === "group" ? "#" + (channel.name ?? "team") : channel.otherProfile?.full_name ?? ""}…`}
@@ -228,13 +331,13 @@ export function MessageThread({ channel, initialMessages, currentUserId, current
           <Button
             size="icon"
             onClick={handleSend}
-            disabled={!text.trim() || sending}
-            className="shrink-0 h-10 w-10"
+            disabled={(!text.trim() && !file) || sending || uploading}
+            className="shrink-0 h-10 w-10 ml-2"
           >
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1">Enter to send · Shift+Enter for new line</p>
+        <p className="text-[10px] text-muted-foreground mt-1 ml-14">Enter to send · Shift+Enter for new line</p>
       </div>
     </div>
   );

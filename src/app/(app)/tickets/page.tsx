@@ -1,13 +1,23 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getTickets } from "@/actions/tickets";
+import { getTeamMembers } from "@/actions/team";
 import { TopBar } from "@/components/layout/TopBar";
 import { TicketFormDialog } from "@/components/tickets/TicketFormDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/EmptyState";
 import Link from "next/link";
-import { Ticket } from "lucide-react";
+import { Ticket, ClockAlert, User as UserIcon } from "lucide-react";
+
+function getSlaStatus(dueDate: string | null) {
+  if (!dueDate) return null;
+  const dueTime = new Date(dueDate).getTime();
+  const now = Date.now();
+  if (dueTime < now) return { label: "Breached", class: "bg-red-100 text-red-800 border-red-200" };
+  if (dueTime < now + 2 * 3600000) return { label: "At Risk", class: "bg-orange-100 text-orange-800 border-orange-200" };
+  return null;
+}
 
 const PRIORITY_BADGE: Record<string, string> = {
   low: "bg-gray-100 text-gray-600 border-gray-200",
@@ -25,6 +35,7 @@ const STATUS_BADGE: Record<string, string> = {
 
 const STATUS_LABELS: Record<string, string> = {
   all: "All",
+  mine: "Assigned to Me",
   open: "Open",
   in_progress: "In Progress",
   resolved: "Resolved",
@@ -46,13 +57,17 @@ export default async function TicketsPage({
   const sp = await searchParams;
   const statusFilter = sp.status ?? "all";
 
-  const tickets = await getTickets({ status: statusFilter });
+  const members = await getTeamMembers(profile.current_org_id).catch(() => []);
+  const tickets = await getTickets({ 
+    status: statusFilter === "mine" ? undefined : statusFilter,
+    assigned_to: statusFilter === "mine" ? user.id : undefined 
+  });
 
   return (
     <div className="flex flex-col h-full">
       <TopBar
         title="Support Tickets"
-        actions={<TicketFormDialog />}
+        actions={<TicketFormDialog members={members} />}
       />
 
       {/* Filter bar */}
@@ -96,21 +111,46 @@ export default async function TicketsPage({
                       <span className="font-medium text-sm truncate">{ticket.title}</span>
                     </div>
                     {ticket.lead?.name && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         Lead: {ticket.lead.name}
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex -space-x-1">
+                      {ticket.assignee ? (
+                        <div 
+                          className="h-6 w-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary"
+                          title={`Assigned to ${ticket.assignee.full_name || ticket.assignee.email}`}
+                        >
+                          {(ticket.assignee.full_name || ticket.assignee.email || "U").split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)}
+                        </div>
+                      ) : (
+                        <div 
+                          className="h-6 w-6 rounded-full bg-muted border border-dashed flex items-center justify-center text-muted-foreground"
+                          title="Unassigned"
+                        >
+                          <UserIcon className="h-3 w-3" />
+                        </div>
+                      )}
+                    </div>
+                    {(() => {
+                      const sla = getSlaStatus(ticket.sla_due_at);
+                      return sla ? (
+                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 flex gap-1 ${sla.class}`}>
+                          <ClockAlert className="h-3 w-3" /> {sla.label}
+                        </Badge>
+                      ) : null;
+                    })()}
                     <Badge
                       variant="outline"
-                      className={`text-xs capitalize ${PRIORITY_BADGE[ticket.priority] ?? ""}`}
+                      className={`text-[10px] px-1.5 py-0 capitalize ${PRIORITY_BADGE[ticket.priority] ?? ""}`}
                     >
                       {ticket.priority}
                     </Badge>
                     <Badge
                       variant="outline"
-                      className={`text-xs capitalize ${STATUS_BADGE[ticket.status] ?? ""}`}
+                      className={`text-[10px] px-1.5 py-0 capitalize ${STATUS_BADGE[ticket.status] ?? ""}`}
                     >
                       {ticket.status.replace("_", " ")}
                     </Badge>

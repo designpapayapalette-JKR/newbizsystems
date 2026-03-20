@@ -13,11 +13,15 @@ export default async function InvoicePreviewPage({ params }: { params: Promise<{
 
   const { data: invoice } = await supabase
     .from("invoices")
-    .select("id, invoice_number")
+    .select("id, invoice_number, org:organizations(invoice_template)")
     .eq("id", id)
     .single();
 
   if (!invoice) notFound();
+
+  const orgRaw = (invoice as any).org;
+  const org = Array.isArray(orgRaw) ? orgRaw[0] : orgRaw;
+  const defaultTemplate = org?.invoice_template ?? "classic";
 
   return (
     <div className="flex flex-col h-full">
@@ -26,7 +30,7 @@ export default async function InvoicePreviewPage({ params }: { params: Promise<{
         <Link href={`/invoices/${id}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4" /> Back
         </Link>
-        <InvoicePreviewClient invoiceId={id} invoiceNumber={invoice.invoice_number} />
+        <InvoicePreviewClient invoiceId={id} invoiceNumber={invoice.invoice_number} defaultTemplate={defaultTemplate} />
       </div>
     </div>
   );

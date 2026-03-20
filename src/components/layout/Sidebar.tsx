@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Users, Bell, CreditCard, FileText,
-  Settings, LogOut, Building2, CheckSquare, Headphones, BarChart2, MessageSquare, Shield,
+  Settings, LogOut, Building2, CheckSquare, Headphones, BarChart2, MessageSquare, Shield, BookOpen, LifeBuoy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -49,13 +49,7 @@ export function Sidebar({ orgName, userFullName, userAvatarUrl, userRole, isSupe
     <div className="flex flex-col h-full bg-white border-r w-64 shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-3 p-4 border-b">
-        <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg">
-          <Building2 className="h-4 w-4 text-white" />
-        </div>
-        <div className="min-w-0">
-          <p className="font-semibold text-sm truncate">{orgName}</p>
-          <p className="text-xs text-muted-foreground">BizCRM</p>
-        </div>
+        <img src="/logo-compact.png" alt={orgName} className="h-8 w-auto" />
       </div>
 
       {/* Nav */}

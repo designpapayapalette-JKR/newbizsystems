@@ -62,13 +62,29 @@ export async function addTicketComment(ticketId: string, body: string, isInterna
 
 export async function getTickets(filters?: { status?: string; priority?: string; assigned_to?: string }) {
   const { supabase, orgId } = await getOrgAndUser();
-  let q = supabase.from("tickets").select("*, lead:leads(id, name)").eq("organization_id", orgId).order("created_at", { ascending: false });
+  let q = supabase
+    .from("tickets")
+    .select("*, lead:leads(id, name)")
+    .eq("organization_id", orgId)
+    .order("created_at", { ascending: false });
   if (filters?.status && filters.status !== "all") q = q.eq("status", filters.status);
   if (filters?.priority && filters.priority !== "all") q = q.eq("priority", filters.priority);
   if (filters?.assigned_to) q = q.eq("assigned_to", filters.assigned_to);
   const { data, error } = await q;
   if (error) throw error;
-  return data ?? [];
+  if (!data?.length) return [];
+
+  // Fetch assignee profiles manually
+  const assigneeIds = [...new Set(data.map((t: any) => t.assigned_to).filter(Boolean))];
+  const { data: profiles } = assigneeIds.length
+    ? await supabase.from("profiles").select("id, full_name, avatar_url, email").in("id", assigneeIds)
+    : { data: [] };
+  const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]));
+
+  return data.map((t: any) => ({
+    ...t,
+    assignee: t.assigned_to ? (profileMap[t.assigned_to] ?? null) : null,
+  }));
 }
 
 export async function getTicketById(id: string) {
@@ -81,14 +97,17 @@ export async function getTicketById(id: string) {
   if (error) throw error;
   if (!data) return null;
 
-  const userIds = [...new Set((data.comments ?? []).map((c: any) => c.user_id).filter(Boolean))];
-  const { data: profiles } = userIds.length
-    ? await supabase.from("profiles").select("*").in("id", userIds)
+  const commentUserIds = (data.comments ?? []).map((c: any) => c.user_id).filter(Boolean);
+  const allUserIds = [...new Set([...commentUserIds, data.assigned_to].filter(Boolean))];
+  
+  const { data: profiles } = allUserIds.length
+    ? await supabase.from("profiles").select("*").in("id", allUserIds)
     : { data: [] };
   const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]));
 
   return {
     ...data,
+    assignee: data.assigned_to ? (profileMap[data.assigned_to] ?? null) : null,
     comments: (data.comments ?? []).map((c: any) => ({
       ...c,
       user_profile: c.user_id ? (profileMap[c.user_id] ?? null) : null,
