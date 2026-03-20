@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { createPayment } from "@/actions/payments";
+import { createPayment, updatePayment } from "@/actions/payments";
 import { toast } from "sonner";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Edit2 } from "lucide-react";
+import type { Payment } from "@/types";
 
 interface PaymentFormDialogProps {
   leads: { id: string; name: string }[];
@@ -17,20 +18,21 @@ interface PaymentFormDialogProps {
   trigger?: React.ReactNode;
   defaultLeadId?: string;
   defaultInvoiceId?: string;
+  payment?: Payment;
 }
 
-export function PaymentFormDialog({ leads, invoices, trigger, defaultLeadId, defaultInvoiceId }: PaymentFormDialogProps) {
+export function PaymentFormDialog({ leads, invoices, trigger, defaultLeadId, defaultInvoiceId, payment }: PaymentFormDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("INR");
-  const [leadId, setLeadId] = useState(defaultLeadId ?? "");
-  const [invoiceId, setInvoiceId] = useState(defaultInvoiceId ?? "");
-  const [method, setMethod] = useState("upi");
-  const [reference, setReference] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [notes, setNotes] = useState("");
+  const [amount, setAmount] = useState(payment ? payment.amount.toString() : "");
+  const [currency, setCurrency] = useState(payment?.currency ?? "INR");
+  const [leadId, setLeadId] = useState(payment?.lead_id ?? defaultLeadId ?? "");
+  const [invoiceId, setInvoiceId] = useState(payment?.invoice_id ?? defaultInvoiceId ?? "");
+  const [method, setMethod] = useState<any>(payment?.payment_method ?? "upi");
+  const [reference, setReference] = useState(payment?.reference_number ?? "");
+  const [dueDate, setDueDate] = useState(payment?.due_date ? String(payment.due_date).split('T')[0] : "");
+  const [notes, setNotes] = useState(payment?.notes ?? "");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,7 +42,7 @@ export function PaymentFormDialog({ leads, invoices, trigger, defaultLeadId, def
     }
     setLoading(true);
     try {
-      await createPayment({
+      const data = {
         amount: parseFloat(amount),
         currency,
         lead_id: leadId || undefined,
@@ -49,13 +51,21 @@ export function PaymentFormDialog({ leads, invoices, trigger, defaultLeadId, def
         reference_number: reference || undefined,
         due_date: dueDate || undefined,
         notes: notes || undefined,
-      });
-      toast.success("Payment recorded");
+      };
+
+      if (payment) {
+        await updatePayment(payment.id, data);
+        toast.success("Payment updated");
+      } else {
+        await createPayment(data);
+        toast.success("Payment recorded");
+        setAmount("");
+      }
+      
       setOpen(false);
-      setAmount("");
       router.refresh();
     } catch {
-      toast.error("Failed to record payment");
+      toast.error(payment ? "Failed to update payment" : "Failed to record payment");
     } finally {
       setLoading(false);
     }
@@ -65,14 +75,14 @@ export function PaymentFormDialog({ leads, invoices, trigger, defaultLeadId, def
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button size="sm">
-            <Plus className="h-4 w-4" />
-            Add Payment
+          <Button size="sm" variant={payment ? "ghost" : "default"}>
+            {payment ? <Edit2 className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+            {payment ? "Edit" : "Add Payment"}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Record Payment</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{payment ? "Edit Payment" : "Record Payment"}</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -141,8 +151,8 @@ export function PaymentFormDialog({ leads, invoices, trigger, defaultLeadId, def
             <Textarea placeholder="Additional notes..." value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Loader2 className="animate-spin" />}
-            Record Payment
+            {loading && <Loader2 className="animate-spin mr-2" />}
+            {payment ? "Update Payment" : "Record Payment"}
           </Button>
         </form>
       </DialogContent>

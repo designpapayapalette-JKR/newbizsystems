@@ -12,7 +12,7 @@ export function CommunicationSection() {
             <p className="text-blue-100 text-lg leading-relaxed mb-8">
               Call, WhatsApp, or email any lead directly from NewBiz CRM — no copy-pasting numbers, no switching apps.
             </p>
-            <Link href="/signup" className="inline-flex items-center gap-2 bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors">
+            <Link href="/CRM/signup" className="inline-flex items-center gap-2 bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors">
               Try it free <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

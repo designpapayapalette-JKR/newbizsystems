@@ -15,7 +15,7 @@ export const products = [
     color: "from-blue-500 to-indigo-600",
     iconBg: "bg-blue-50 text-blue-600",
     status: "beta" as const,
-    href: "/signup",
+    href: "/CRM/signup",
     cta: "Try Free — Beta Access",
     features: ["Lead pipeline", "GST invoicing", "PhonePe payments", "Team roles", "Push reminders"],
   },
@@ -103,7 +103,7 @@ export const plans = [
     highlight: false,
     features: ["50 leads", "1 member", "5 invoices/mo", "Basic pipeline", "Push reminders"],
     cta: "Start Free",
-    href: "/signup",
+    href: "/CRM/signup",
   },
   {
     name: "Starter",
@@ -115,7 +115,7 @@ export const plans = [
     highlight: true,
     features: ["500 leads", "3 members", "50 invoices/mo", "Reminders & pipeline", "Email templates", "WhatsApp & calling"],
     cta: "Get Starter",
-    href: "/signup",
+    href: "/CRM/signup",
   },
   {
     name: "Growth",
@@ -127,7 +127,7 @@ export const plans = [
     highlight: false,
     features: ["2,000 leads", "10 members", "200 invoices/mo", "All Starter features", "Webhooks & API", "Audit log"],
     cta: "Start Growth",
-    href: "/signup",
+    href: "/CRM/signup",
   },
   {
     name: "Pro",
@@ -139,7 +139,7 @@ export const plans = [
     highlight: false,
     features: ["Unlimited leads", "Unlimited members", "Unlimited invoices", "All Growth features", "Priority support", "Custom branding"],
     cta: "Go Pro",
-    href: "/signup",
+    href: "/CRM/signup",
   },
 ];
 

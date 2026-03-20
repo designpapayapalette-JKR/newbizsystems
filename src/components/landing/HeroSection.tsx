@@ -26,7 +26,7 @@ export function HeroSection() {
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center mb-12">
           <Link
-            href="/signup"
+            href="/CRM/signup"
             className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-base font-semibold px-7 py-3.5 rounded-xl transition-colors shadow-lg shadow-blue-900/40"
           >
             Try NewBiz CRM — Free <ArrowRight className="h-4 w-4" />

@@ -133,7 +133,7 @@ export async function assignSubscription(orgId: string, planId: string, opts: {
   }, { onConflict: "organization_id" });
 
   if (error) throw error;
-  revalidatePath("/admin");
+  revalidatePath("/CRM/admin");
   revalidatePath("/settings/billing");
 }
 
@@ -147,7 +147,7 @@ export async function updateSubscriptionStatus(orgId: string, status: "trialing"
 
   const { error } = await admin.from("org_subscriptions").update(update).eq("organization_id", orgId);
   if (error) throw error;
-  revalidatePath("/admin");
+  revalidatePath("/CRM/admin");
   revalidatePath("/settings/billing");
 }
 
@@ -156,7 +156,7 @@ export async function createPlan(data: Omit<SubscriptionPlan, "id">) {
   const admin = await createServiceClient();
   const { error } = await admin.from("subscription_plans").insert({ ...data });
   if (error) throw error;
-  revalidatePath("/admin");
+  revalidatePath("/CRM/admin");
 }
 
 export async function updatePlan(id: string, data: Partial<Omit<SubscriptionPlan, "id">>) {
@@ -164,7 +164,7 @@ export async function updatePlan(id: string, data: Partial<Omit<SubscriptionPlan
   const admin = await createServiceClient();
   const { error } = await admin.from("subscription_plans").update({ ...data, updated_at: new Date().toISOString() }).eq("id", id);
   if (error) throw error;
-  revalidatePath("/admin");
+  revalidatePath("/CRM/admin");
   revalidatePath("/settings/billing");
 }
 
@@ -174,7 +174,7 @@ export async function deletePlan(id: string) {
   // Soft delete — mark inactive
   const { error } = await admin.from("subscription_plans").update({ is_active: false }).eq("id", id);
   if (error) throw error;
-  revalidatePath("/admin");
+  revalidatePath("/CRM/admin");
 }
 
 export async function setSuperAdmin(userId: string, value: boolean) {
@@ -182,5 +182,5 @@ export async function setSuperAdmin(userId: string, value: boolean) {
   const admin = await createServiceClient();
   const { error } = await admin.from("profiles").update({ is_super_admin: value }).eq("id", userId);
   if (error) throw error;
-  revalidatePath("/admin");
+  revalidatePath("/CRM/admin");
 }

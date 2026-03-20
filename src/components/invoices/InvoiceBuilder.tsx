@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createInvoice } from "@/actions/invoices";
+import { createInvoice, updateInvoice } from "@/actions/invoices";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
 import { Plus, Trash2, Loader2 } from "lucide-react";
@@ -41,23 +41,36 @@ interface Lead {
 export function InvoiceBuilder({ 
   leads, 
   defaultLeadId,
-  organization: org
+  organization: org,
+  invoice
 }: { 
   leads: Lead[]; 
   defaultLeadId?: string;
   organization?: Org;
+  invoice?: any;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [leadId, setLeadId] = useState(defaultLeadId ?? "");
-  const [title, setTitle] = useState("");
-  const [issueDate, setIssueDate] = useState(new Date().toISOString().slice(0, 10));
-  const [dueDate, setDueDate] = useState("");
-  const [discount, setDiscount] = useState("0");
-  const [notes, setNotes] = useState("");
-  const [terms, setTerms] = useState("Payment due within 30 days of invoice date.");
-  const [currency, setCurrency] = useState(org?.currency ?? "INR");
-  const [items, setItems] = useState<LineItem[]>([{ description: "", hsn_sac: "", quantity: 1, unit_price: 0, tax_rate: 18 }]);
+  const [leadId, setLeadId] = useState(invoice?.lead_id ?? defaultLeadId ?? "");
+  const [title, setTitle] = useState(invoice?.title ?? "");
+  const [issueDate, setIssueDate] = useState(invoice?.issue_date ? invoice.issue_date.split('T')[0] : new Date().toISOString().slice(0, 10));
+  const [dueDate, setDueDate] = useState(invoice?.due_date ? invoice.due_date.split('T')[0] : "");
+  const [discount, setDiscount] = useState(invoice?.discount?.toString() ?? "0");
+  const [notes, setNotes] = useState(invoice?.notes ?? "");
+  const [terms, setTerms] = useState(invoice?.terms ?? "Payment due within 30 days of invoice date.");
+  const [currency, setCurrency] = useState(invoice?.currency ?? org?.currency ?? "INR");
+  
+  const initialItems = invoice?.line_items?.length 
+    ? invoice.line_items.map((i: any) => ({
+        description: i.description,
+        hsn_sac: i.hsn_sac || "",
+        quantity: i.quantity,
+        unit_price: i.unit_price,
+        tax_rate: i.tax_rate || 0,
+      }))
+    : [{ description: "", hsn_sac: "", quantity: 1, unit_price: 0, tax_rate: 18 }];
+    
+  const [items, setItems] = useState<LineItem[]>(initialItems);
 
   const selectedLead = leads.find(l => l.id === leadId);
 
@@ -115,7 +128,7 @@ export function InvoiceBuilder({
     }
     setLoading(true);
     try {
-      const invoice = await createInvoice({
+      const payload = {
         lead_id: leadId || undefined,
         title: title || undefined,
         issue_date: issueDate,
@@ -125,11 +138,19 @@ export function InvoiceBuilder({
         terms: terms || undefined,
         currency,
         line_items: items.filter((i) => i.description.trim()),
-      });
-      toast.success("Invoice created!");
-      router.push(`/invoices/${invoice.id}`);
+      };
+
+      if (invoice) {
+        await updateInvoice(invoice.id, payload);
+        toast.success("Invoice updated!");
+        router.push(`/invoices/${invoice.id}`);
+      } else {
+        const newInvoice = await createInvoice(payload);
+        toast.success("Invoice created!");
+        router.push(`/invoices/${newInvoice.id}`);
+      }
     } catch (err: any) {
-      toast.error(err.message || "Failed to create invoice");
+      toast.error(err.message || (invoice ? "Failed to update invoice" : "Failed to create invoice"));
     } finally {
       setLoading(false);
     }
@@ -341,8 +362,8 @@ export function InvoiceBuilder({
       </Card>
 
       <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={loading}>
-        {loading && <Loader2 className="animate-spin" />}
-        Create Invoice
+        {loading && <Loader2 className="animate-spin mr-2" />}
+        {invoice ? "Update Invoice" : "Create Invoice"}
       </Button>
     </form>
   );

@@ -65,7 +65,7 @@ export async function createLead(data: LeadFormData) {
     await supabase.from("lead_tags").insert(tags.map((tag) => ({ lead_id: lead.id, tag })));
   }
 
-  revalidatePath("/leads");
+  revalidatePath("/CRM/leads");
   return lead;
 }
 
@@ -83,26 +83,26 @@ export async function updateLead(id: string, data: Partial<LeadFormData>) {
     }
   }
 
-  revalidatePath("/leads");
+  revalidatePath("/CRM/leads");
   revalidatePath(`/leads/${id}`);
 }
 
 export async function deleteLead(id: string) {
   const supabase = await createClient();
   await supabase.from("leads").update({ is_archived: true }).eq("id", id);
-  revalidatePath("/leads");
+  revalidatePath("/CRM/leads");
 }
 
 export async function restoreLead(id: string) {
   const supabase = await createClient();
   await supabase.from("leads").update({ is_archived: false }).eq("id", id);
-  revalidatePath("/leads");
+  revalidatePath("/CRM/leads");
 }
 
 export async function updateLeadStage(id: string, stageId: string, position: number) {
   const supabase = await createClient();
   await supabase.from("leads").update({ stage_id: stageId, position }).eq("id", id);
-  revalidatePath("/leads");
+  revalidatePath("/CRM/leads");
 }
 
 export async function getLeads(orgId: string, filters?: {
@@ -192,5 +192,5 @@ export async function assignLead(leadId: string, userId: string | null) {
     .eq("id", leadId);
   if (error) throw error;
   revalidatePath(`/leads/${leadId}`);
-  revalidatePath("/leads");
+  revalidatePath("/CRM/leads");
 }

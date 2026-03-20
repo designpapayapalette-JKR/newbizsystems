@@ -46,7 +46,7 @@ export async function logActivity(
     await supabase.from("leads").update({ last_activity_at: new Date().toISOString() }).eq("id", leadId);
 
     revalidatePath(`/leads/${leadId}`);
-    revalidatePath("/dashboard");
+    revalidatePath("/CRM/dashboard");
   } else {
     // Direct signature: logActivity({ lead_id, organization_id, type, ... })
     const directData = leadIdOrData;
@@ -61,7 +61,7 @@ export async function logActivity(
     await supabase.from("leads").update({ last_activity_at: new Date().toISOString() }).eq("id", directData.lead_id);
 
     revalidatePath(`/leads/${directData.lead_id}`);
-    revalidatePath("/dashboard");
+    revalidatePath("/CRM/dashboard");
   }
 }
 
@@ -69,8 +69,8 @@ export async function updateActivity(id: string, data: { outcome?: string; title
   const supabase = await createClient();
   const { error } = await supabase.from("activities").update(data).eq("id", id);
   if (error) throw error;
-  revalidatePath("/tasks");
-  revalidatePath("/leads");
+  revalidatePath("/CRM/tasks");
+  revalidatePath("/CRM/leads");
 }
 
 export async function deleteActivity(id: string, leadId: string) {

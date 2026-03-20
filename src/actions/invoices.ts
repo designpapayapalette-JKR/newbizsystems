@@ -141,7 +141,7 @@ export async function createInvoice(data: InvoiceFormData) {
 
   await supabase.from("invoice_line_items").insert(lineItems);
 
-  revalidatePath("/invoices");
+  revalidatePath("/CRM/invoices");
   return invoice;
 }
 
@@ -238,21 +238,21 @@ export async function updateInvoice(id: string, data: Partial<InvoiceFormData>) 
     }
   }
 
-  revalidatePath("/invoices");
+  revalidatePath("/CRM/invoices");
   revalidatePath(`/invoices/${id}`);
 }
 
 export async function updateInvoiceStatus(id: string, status: string) {
   const supabase = await createClient();
   await supabase.from("invoices").update({ status }).eq("id", id);
-  revalidatePath("/invoices");
+  revalidatePath("/CRM/invoices");
   revalidatePath(`/invoices/${id}`);
 }
 
 export async function deleteInvoice(id: string) {
   const supabase = await createClient();
   await supabase.from("invoices").update({ status: "cancelled" }).eq("id", id);
-  revalidatePath("/invoices");
+  revalidatePath("/CRM/invoices");
 }
 
 export async function getInvoices(orgId: string) {

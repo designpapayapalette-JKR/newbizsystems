@@ -13,16 +13,16 @@ import { getInitials } from "@/lib/utils";
 import type { Role } from "@/types";
 
 const allNavItems = [
-  { href: "/dashboard",         label: "Dashboard",  icon: LayoutDashboard, roles: ["owner","admin","member"] },
-  { href: "/leads",             label: "Leads",       icon: Users,           roles: ["owner","admin","member"] },
-  { href: "/reminders",         label: "Reminders",   icon: Bell,            roles: ["owner","admin","member"] },
-  { href: "/tasks",             label: "Tasks",       icon: CheckSquare,     roles: ["owner","admin","member"] },
-  { href: "/tickets",           label: "Tickets",     icon: Headphones,      roles: ["owner","admin","member"] },
-  { href: "/messages",          label: "Messages",    icon: MessageSquare,   roles: ["owner","admin","member"] },
-  { href: "/reports",           label: "Reports",     icon: BarChart2,       roles: ["owner","admin"] },
-  { href: "/payments",          label: "Payments",    icon: CreditCard,      roles: ["owner","admin"] },
-  { href: "/invoices",          label: "Invoices",    icon: FileText,        roles: ["owner","admin"] },
-  { href: "/settings/profile",  label: "Settings",    icon: Settings,        roles: ["owner","admin","member"] },
+  { href: "/CRM/dashboard",         label: "Dashboard",  icon: LayoutDashboard, roles: ["owner","admin","member"] },
+  { href: "/CRM/leads",             label: "Leads",       icon: Users,           roles: ["owner","admin","member"] },
+  { href: "/CRM/reminders",         label: "Reminders",   icon: Bell,            roles: ["owner","admin","member"] },
+  { href: "/CRM/tasks",             label: "Tasks",       icon: CheckSquare,     roles: ["owner","admin","member"] },
+  { href: "/CRM/tickets",           label: "Tickets",     icon: Headphones,      roles: ["owner","admin","member"] },
+  { href: "/CRM/messages",          label: "Messages",    icon: MessageSquare,   roles: ["owner","admin","member"] },
+  { href: "/CRM/reports",           label: "Reports",     icon: BarChart2,       roles: ["owner","admin"] },
+  { href: "/CRM/payments",          label: "Payments",    icon: CreditCard,      roles: ["owner","admin"] },
+  { href: "/CRM/invoices",          label: "Invoices",    icon: FileText,        roles: ["owner","admin"] },
+  { href: "/CRM/settings/profile",  label: "Settings",    icon: Settings,        roles: ["owner","admin","member"] },
 ];
 
 interface SidebarProps {
@@ -42,7 +42,7 @@ export function Sidebar({ orgName, userFullName, userAvatarUrl, userRole, isSupe
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push("/CRM/login");
   }
 
   return (
@@ -79,10 +79,10 @@ export function Sidebar({ orgName, userFullName, userAvatarUrl, userRole, isSupe
       {isSuperAdmin && (
         <div className="px-2 pb-2">
           <Link
-            href="/admin"
+            href="/CRM/admin"
             className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-              pathname.startsWith("/admin")
+              pathname.startsWith("/CRM/admin")
                 ? "bg-amber-500 text-white"
                 : "text-amber-600 hover:bg-amber-50"
             )}

@@ -11,7 +11,7 @@ export function HandHoldingSection() {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
-            href="/signup"
+            href="/CRM/signup"
             className="inline-flex items-center justify-center gap-2 bg-white text-blue-700 hover:bg-blue-50 font-semibold px-7 py-3.5 rounded-xl transition-colors"
           >
             Get started free <ArrowRight className="h-4 w-4" />

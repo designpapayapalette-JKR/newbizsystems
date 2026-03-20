@@ -18,7 +18,7 @@ export function TopBar({ title, subtitle, actions }: TopBarProps) {
       </div>
       <div className="flex items-center gap-2">
         {actions}
-        <Link href="/reminders">
+        <Link href="/CRM/reminders">
           <Button variant="ghost" size="icon">
             <Bell className="h-4 w-4" />
           </Button>

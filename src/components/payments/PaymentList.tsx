@@ -3,9 +3,10 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { markPaymentPaid } from "@/actions/payments";
+import { markPaymentPaid, deletePayment } from "@/actions/payments";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, ExternalLink, Copy } from "lucide-react";
+import { CheckCircle2, ExternalLink, Copy, Pencil, Trash2 } from "lucide-react";
+import { PaymentFormDialog } from "./PaymentFormDialog";
 import { toast } from "sonner";
 import type { Payment, PaymentStatus } from "@/types";
 
@@ -18,13 +19,29 @@ const statusConfig: Record<PaymentStatus, { label: string; variant: any }> = {
   failed: { label: "Failed", variant: "destructive" },
 };
 
-export function PaymentList({ payments }: { payments: Payment[] }) {
+export function PaymentList({ 
+  payments,
+  leads = [],
+  invoices = []
+}: { 
+  payments: Payment[];
+  leads?: { id: string; name: string }[];
+  invoices?: { id: string; invoice_number: string; total: number }[];
+}) {
   const router = useRouter();
 
   async function handleMarkPaid(id: string) {
     await markPaymentPaid(id);
     toast.success("Payment marked as paid");
     router.refresh();
+  }
+
+  async function handleDelete(id: string) {
+    if (confirm("Are you sure you want to delete this payment?")) {
+      await deletePayment(id);
+      toast.success("Payment deleted");
+      router.refresh();
+    }
   }
 
   async function handleSendLink(payment: Payment) {
@@ -95,6 +112,20 @@ export function PaymentList({ payments }: { payments: Payment[] }) {
                   )}
                 </>
               )}
+              
+              <PaymentFormDialog
+                leads={leads}
+                invoices={invoices}
+                payment={p}
+                trigger={
+                  <Button variant="ghost" size="icon" className="h-8 w-8 ml-1" title="Edit Payment">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                }
+              />
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(p.id)} title="Delete Payment">
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         );

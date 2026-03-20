@@ -160,6 +160,6 @@ export async function assignTask(data: {
   });
 
   if (error) throw error;
-  revalidatePath("/tasks");
+  revalidatePath("/CRM/tasks");
   revalidatePath("/settings/team");
 }

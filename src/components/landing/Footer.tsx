@@ -31,7 +31,7 @@ export function Footer() {
             <p className="font-semibold text-gray-900 text-sm mb-3">Products</p>
             <ul className="space-y-2 text-sm text-gray-500">
               <li className="flex items-center gap-1.5">
-                <Link href="/signup" className="hover:text-gray-900 transition-colors">NewBiz CRM</Link>
+                <Link href="/CRM/signup" className="hover:text-gray-900 transition-colors">NewBiz CRM</Link>
                 <BetaBadge />
               </li>
               <li className="text-gray-400">NewBiz Books <span className="text-[10px]">(soon)</span></li>
@@ -74,7 +74,7 @@ export function Footer() {
                   Uttar Pradesh 201309
                 </span>
               </li>
-              <li><Link href="/login" className="hover:text-gray-900 transition-colors">Sign In</Link></li>
+              <li><Link href="/CRM/login" className="hover:text-gray-900 transition-colors">Sign In</Link></li>
             </ul>
           </div>
         </div>

@@ -147,7 +147,7 @@ export function NotificationProvider() {
         markAlerted(reminder.id);
         playChime();
 
-        const url = reminder.lead_id ? `/leads/${reminder.lead_id}` : "/reminders";
+        const url = reminder.lead_id ? `/CRM/leads/${reminder.lead_id}` : "/CRM/reminders";
 
         // In-app toast notification
         toast(reminder.title, {

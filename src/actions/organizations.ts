@@ -108,5 +108,5 @@ export async function updatePipelineStages(orgId: string, stages: { id?: string;
   }
 
   revalidatePath("/settings/pipeline");
-  revalidatePath("/leads");
+  revalidatePath("/CRM/leads");
 }

@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Download, Eye } from "lucide-react";
+import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import type { Invoice, InvoiceStatus } from "@/types";
+import { deleteInvoice } from "@/actions/invoices";
+import { toast } from "sonner";
 
 const statusConfig: Record<InvoiceStatus, { label: string; variant: any }> = {
   draft: { label: "Draft", variant: "secondary" },
@@ -16,6 +18,13 @@ const statusConfig: Record<InvoiceStatus, { label: string; variant: any }> = {
 };
 
 export function InvoiceList({ invoices }: { invoices: Invoice[] }) {
+  async function handleDelete(id: string) {
+    if (confirm("Are you sure you want to cancel/delete this invoice?")) {
+      await deleteInvoice(id);
+      toast.success("Invoice cancelled");
+    }
+  }
+
   return (
     <div className="space-y-2">
       {invoices.map((inv) => {
@@ -49,6 +58,18 @@ export function InvoiceList({ invoices }: { invoices: Invoice[] }) {
                     <Download className="h-4 w-4" />
                   </a>
                 </Button>
+                {inv.status !== 'cancelled' && (
+                  <>
+                    <Button asChild variant="ghost" size="icon" className="h-8 w-8" title="Edit Invoice">
+                      <Link href={`/invoices/${inv.id}/edit`}>
+                        <Pencil className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(inv.id)} title="Delete/Cancel Invoice">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>

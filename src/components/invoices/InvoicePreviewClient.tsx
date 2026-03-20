@@ -32,42 +32,8 @@ export function InvoicePreviewClient({
 
   return (
     <div className="space-y-4">
-      {/* Template selector */}
-      <div className="bg-white border rounded-xl p-4 shadow-sm">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Choose Template</p>
-        <div className="flex flex-wrap gap-2">
-          {TEMPLATES.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setSelected(t.id)}
-              className={`group relative px-4 py-2.5 rounded-lg border-2 text-left transition-all ${
-                selected === t.id
-                  ? "border-primary bg-primary text-white shadow-md"
-                  : "border-gray-200 bg-white hover:border-primary/50 hover:bg-gray-50"
-              }`}
-            >
-              <div className={`text-sm font-semibold ${selected === t.id ? "text-white" : "text-gray-800"}`}>{t.label}</div>
-              <div className={`text-xs mt-0.5 ${selected === t.id ? "text-white/75" : "text-gray-400"}`}>{t.desc}</div>
-              {selected === t.id && (
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3 5.5L6.5 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-        {selected === defaultTemplate ? (
-          <p className="text-xs text-muted-foreground mt-2">✓ Using your organisation&apos;s default template. Change the default in <a href="/settings/organization" className="underline hover:text-foreground">Settings → Organization</a>.</p>
-        ) : (
-          <p className="text-xs text-amber-600 mt-2">⚡ You&apos;ve overridden the default for this preview. Your org default is <strong>{TEMPLATES.find(t => t.id === defaultTemplate)?.label ?? defaultTemplate}</strong>.</p>
-        )}
-      </div>
-
       {/* Actions */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <p className="text-sm text-muted-foreground">
-          Previewing: <span className="font-medium text-gray-900">{TEMPLATES.find(t => t.id === selected)?.label}</span>
-        </p>
+      <div className="flex items-center justify-end flex-wrap gap-2">
         <div className="flex gap-2">
           <button
             onClick={handlePrint}

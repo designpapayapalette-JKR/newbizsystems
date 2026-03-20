@@ -6,7 +6,7 @@ import type { NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
+  const redirectTo = searchParams.get("redirectTo") || "/CRM/dashboard";
 
   if (code) {
     const cookieStore = await cookies();
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       // If returning from an invite link, skip org check — the invite page handles joining
-      if (redirectTo.startsWith("/invite/")) {
+      if (redirectTo.startsWith("/CRM/invite/")) {
         return NextResponse.redirect(`${origin}${redirectTo}`);
       }
 
@@ -40,15 +40,15 @@ export async function GET(request: NextRequest) {
           .select("organization_id")
           .eq("user_id", user.id)
           .limit(1)
-          .single();
+          .maybeSingle(); // single() throws if 0 rows, maybeSingle() returns null
 
         if (!membership) {
-          return NextResponse.redirect(`${origin}/onboarding`);
+          return NextResponse.redirect(`${origin}/CRM/onboarding`);
         }
       }
       return NextResponse.redirect(`${origin}${redirectTo}`);
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+  return NextResponse.redirect(`${origin}/CRM/login?error=auth_callback_failed`);
 }

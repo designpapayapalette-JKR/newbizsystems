@@ -33,7 +33,7 @@ export function CrmFeaturesSection() {
 
         <div className="mt-8 text-center">
           <Link
-            href="/signup"
+            href="/CRM/signup"
             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-7 py-3.5 rounded-xl transition-colors shadow-md shadow-blue-100"
           >
             Start using NewBiz CRM free <ArrowRight className="h-4 w-4" />

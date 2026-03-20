@@ -26,7 +26,23 @@ export async function createPayment(data: PaymentFormData) {
     .single();
 
   if (error) throw error;
-  revalidatePath("/payments");
+  revalidatePath("/CRM/payments");
+  return payment;
+}
+
+export async function updatePayment(id: string, data: Partial<PaymentFormData>) {
+  const supabase = await createClient();
+  
+  const { data: payment, error } = await supabase
+    .from("payments")
+    .update({ ...data })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath("/CRM/payments");
+  revalidatePath(`/payments/${id}`);
   return payment;
 }
 
@@ -56,20 +72,20 @@ export async function markPaymentPaid(id: string) {
     }
   }
 
-  revalidatePath("/payments");
-  revalidatePath("/invoices");
+  revalidatePath("/CRM/payments");
+  revalidatePath("/CRM/invoices");
 }
 
 export async function updatePaymentStatus(id: string, status: PaymentStatus) {
   const supabase = await createClient();
   await supabase.from("payments").update({ status }).eq("id", id);
-  revalidatePath("/payments");
+  revalidatePath("/CRM/payments");
 }
 
 export async function deletePayment(id: string) {
   const supabase = await createClient();
   await supabase.from("payments").delete().eq("id", id);
-  revalidatePath("/payments");
+  revalidatePath("/CRM/payments");
 }
 
 export async function getPayments(orgId: string) {

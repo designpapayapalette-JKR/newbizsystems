@@ -39,7 +39,7 @@ export async function createTicket(data: {
     created_by: user.id,
   }).select().single();
   if (error) throw error;
-  revalidatePath("/tickets");
+  revalidatePath("/CRM/tickets");
   return ticket;
 }
 
@@ -49,7 +49,7 @@ export async function updateTicket(id: string, data: { title?: string; descripti
   if (data.status === "resolved" || data.status === "closed") update.resolved_at = new Date().toISOString();
   const { error } = await supabase.from("tickets").update(update).eq("id", id);
   if (error) throw error;
-  revalidatePath("/tickets");
+  revalidatePath("/CRM/tickets");
   revalidatePath(`/tickets/${id}`);
 }
 

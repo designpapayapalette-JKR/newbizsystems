@@ -19,7 +19,7 @@ export function LeadDeleteButton({ leadId }: { leadId: string }) {
     try {
       await deleteLead(leadId);
       toast.success("Lead deleted");
-      router.push("/leads");
+      router.push("/CRM/leads");
     } catch {
       toast.error("Failed to delete lead");
       setLoading(false);
