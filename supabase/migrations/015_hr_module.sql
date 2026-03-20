@@ -79,10 +79,19 @@ ALTER TABLE public.hr_attendance ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hr_leaves ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hr_payroll ENABLE ROW LEVEL SECURITY;
 
+-- Trigger function for updated_at (self-contained, no external dependency)
+CREATE OR REPLACE FUNCTION public.hr_set_updated_at()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$;
+
 -- Triggers for updated_at
-CREATE TRIGGER set_hr_employees_updated_at BEFORE UPDATE ON public.hr_employees FOR EACH ROW EXECUTE PROCEDURE public.set_current_timestamp_updated_at();
-CREATE TRIGGER set_hr_leaves_updated_at BEFORE UPDATE ON public.hr_leaves FOR EACH ROW EXECUTE PROCEDURE public.set_current_timestamp_updated_at();
-CREATE TRIGGER set_hr_payroll_updated_at BEFORE UPDATE ON public.hr_payroll FOR EACH ROW EXECUTE PROCEDURE public.set_current_timestamp_updated_at();
+CREATE TRIGGER set_hr_employees_updated_at BEFORE UPDATE ON public.hr_employees FOR EACH ROW EXECUTE PROCEDURE public.hr_set_updated_at();
+CREATE TRIGGER set_hr_leaves_updated_at BEFORE UPDATE ON public.hr_leaves FOR EACH ROW EXECUTE PROCEDURE public.hr_set_updated_at();
+CREATE TRIGGER set_hr_payroll_updated_at BEFORE UPDATE ON public.hr_payroll FOR EACH ROW EXECUTE PROCEDURE public.hr_set_updated_at();
 
 -- RLS Policies (Users can view/edit their organization's data if they are linked to it in profiles)
 -- Organizations check logic
