@@ -31,7 +31,7 @@ export function Footer() {
             <p className="font-semibold text-gray-900 text-sm mb-3">Products</p>
             <ul className="space-y-2 text-sm text-gray-500">
               <li className="flex items-center gap-1.5">
-                <Link href="/ERP/signup" className="hover:text-gray-900 transition-colors">NewBiz CRM</Link>
+                <Link href="/ERP/signup" className="hover:text-gray-900 transition-colors">NewBiz ERP</Link>
                 <BetaBadge />
               </li>
               <li className="text-gray-400">NewBiz Books <span className="text-[10px]">(soon)</span></li>
@@ -48,7 +48,7 @@ export function Footer() {
               <li><a href="#why-us" className="hover:text-gray-900 transition-colors">Why NewBiz</a></li>
               <li><a href="#testimonials" className="hover:text-gray-900 transition-colors">Customer Stories</a></li>
               <li><a href="#notify" className="hover:text-gray-900 transition-colors">Early Access</a></li>
-              <li><span className="text-gray-400">Blog (coming soon)</span></li>
+              <li><Link href="/blog" className="hover:text-gray-900 transition-colors">Blog</Link></li>
               <li><span className="text-gray-400">Careers</span></li>
             </ul>
           </div>

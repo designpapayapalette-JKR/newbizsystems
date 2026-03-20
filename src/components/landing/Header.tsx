@@ -15,6 +15,7 @@ export function Header() {
           <a href="/#crm" className="hover:text-gray-900 transition-colors">Features</a>
           <a href="/#why-us" className="hover:text-gray-900 transition-colors">Why NewBiz</a>
           <a href="/#pricing" className="hover:text-gray-900 transition-colors">Pricing</a>
+          <Link href="/blog" className="hover:text-gray-900 transition-colors">Blog</Link>
           <a href="/#notify" className="hover:text-gray-900 transition-colors">Early Access</a>
         </nav>
 
