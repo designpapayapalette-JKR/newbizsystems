@@ -41,6 +41,7 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = pathname.startsWith("/ERP/login") ||
                      pathname.startsWith("/ERP/signup");
   const isPublicPage = pathname === "/" ||
+                       pathname.startsWith("/blog") ||
                        pathname.startsWith("/privacy") ||
                        pathname.startsWith("/terms") ||
                        pathname.startsWith("/refund-policy") ||
