@@ -18,12 +18,12 @@ export function TopBar({ title, subtitle, actions }: TopBarProps) {
       </div>
       <div className="flex items-center gap-2">
         {actions}
-        <Link href="/CRM/reminders">
+        <Link href="/ERP/reminders">
           <Button variant="ghost" size="icon">
             <Bell className="h-4 w-4" />
           </Button>
         </Link>
-        <Link href="/CRM/settings/profile" className="md:hidden">
+        <Link href="/ERP/settings/profile" className="md:hidden">
           <Button variant="ghost" size="icon">
             <Settings className="h-4 w-4" />
           </Button>

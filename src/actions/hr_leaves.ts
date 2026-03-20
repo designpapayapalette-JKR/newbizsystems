@@ -35,7 +35,7 @@ export async function createLeaveRequest(data: {
     status: "pending",
   });
   if (error) throw error;
-  revalidatePath("/CRM/hr/leaves");
+  revalidatePath("/ERP/hr/leaves");
 }
 
 export async function updateLeaveStatus(leaveId: string, status: "approved" | "rejected") {
@@ -45,12 +45,12 @@ export async function updateLeaveStatus(leaveId: string, status: "approved" | "r
     .update({ status, approved_by: user.id })
     .eq("id", leaveId);
   if (error) throw error;
-  revalidatePath("/CRM/hr/leaves");
+  revalidatePath("/ERP/hr/leaves");
 }
 
 export async function deleteLeave(leaveId: string) {
   const { supabase } = await getOrgId();
   const { error } = await supabase.from("hr_leaves").delete().eq("id", leaveId);
   if (error) throw error;
-  revalidatePath("/CRM/hr/leaves");
+  revalidatePath("/ERP/hr/leaves");
 }

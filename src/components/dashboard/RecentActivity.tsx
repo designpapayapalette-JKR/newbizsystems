@@ -33,7 +33,7 @@ export function RecentActivity({ activities }: { activities: Activity[] }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate">
                     {(a as any).lead ? (
-                      <Link href={`/CRM/leads/${(a as any).lead.id}`} className="font-medium hover:text-primary">
+                      <Link href={`/ERP/leads/${(a as any).lead.id}`} className="font-medium hover:text-primary">
                         {(a as any).lead.name}
                       </Link>
                     ) : "Unknown lead"}

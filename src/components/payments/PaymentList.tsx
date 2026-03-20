@@ -83,10 +83,10 @@ export function PaymentList({
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                 {(p as any).lead && (
-                  <Link href={`/CRM/leads/${(p as any).lead.id}`} className="hover:text-primary">{(p as any).lead.name}</Link>
+                  <Link href={`/ERP/leads/${(p as any).lead.id}`} className="hover:text-primary">{(p as any).lead.name}</Link>
                 )}
                 {(p as any).invoice && (
-                  <Link href={`/CRM/invoices/${(p as any).invoice.id}`} className="hover:text-primary">{(p as any).invoice.invoice_number}</Link>
+                  <Link href={`/ERP/invoices/${(p as any).invoice.id}`} className="hover:text-primary">{(p as any).invoice.invoice_number}</Link>
                 )}
                 {p.due_date && <span>Due: {formatDate(p.due_date)}</span>}
                 {p.paid_at && <span>Paid: {formatDate(p.paid_at)}</span>}

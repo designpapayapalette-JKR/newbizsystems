@@ -6,15 +6,15 @@ import { cn } from "@/lib/utils";
 import type { Role } from "@/types";
 
 const allTabs = [
-  { href: "/CRM/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["owner","admin","member"] },
-  { href: "/CRM/leads",     label: "Leads",      icon: Users,           roles: ["owner","admin","member"] },
-  { href: "/CRM/reminders", label: "Reminders",  icon: Bell,            roles: ["owner","admin","member"] },
-  { href: "/CRM/tasks",     label: "Tasks",      icon: CheckSquare,     roles: ["owner","admin","member"] },
-  { href: "/CRM/tickets",   label: "Tickets",    icon: Headphones,      roles: ["owner","admin","member"] },
-  { href: "/CRM/messages",  label: "Messages",   icon: MessageSquare,   roles: ["owner","admin","member"] },
-  { href: "/CRM/payments",  label: "Payments",   icon: CreditCard,      roles: ["owner","admin"] },
-  { href: "/CRM/invoices",  label: "Invoices",   icon: FileText,        roles: ["owner","admin"] },
-  { href: "/CRM/hr",        label: "HR & Payroll",icon: Briefcase,      roles: ["owner","admin"] },
+  { href: "/ERP/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["owner","admin","member"] },
+  { href: "/ERP/leads",     label: "Leads",      icon: Users,           roles: ["owner","admin","member"] },
+  { href: "/ERP/reminders", label: "Reminders",  icon: Bell,            roles: ["owner","admin","member"] },
+  { href: "/ERP/tasks",     label: "Tasks",      icon: CheckSquare,     roles: ["owner","admin","member"] },
+  { href: "/ERP/tickets",   label: "Tickets",    icon: Headphones,      roles: ["owner","admin","member"] },
+  { href: "/ERP/messages",  label: "Messages",   icon: MessageSquare,   roles: ["owner","admin","member"] },
+  { href: "/ERP/payments",  label: "Payments",   icon: CreditCard,      roles: ["owner","admin"] },
+  { href: "/ERP/invoices",  label: "Invoices",   icon: FileText,        roles: ["owner","admin"] },
+  { href: "/ERP/hr",        label: "HR & Payroll",icon: Briefcase,      roles: ["owner","admin"] },
 ];
 
 export function MobileNav({ userRole }: { userRole: Role }) {

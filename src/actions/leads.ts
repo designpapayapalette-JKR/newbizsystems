@@ -65,7 +65,7 @@ export async function createLead(data: LeadFormData) {
     await supabase.from("lead_tags").insert(tags.map((tag) => ({ lead_id: lead.id, tag })));
   }
 
-  revalidatePath("/CRM/leads");
+  revalidatePath("/ERP/leads");
   return lead;
 }
 
@@ -83,26 +83,26 @@ export async function updateLead(id: string, data: Partial<LeadFormData>) {
     }
   }
 
-  revalidatePath("/CRM/leads");
-  revalidatePath(`/CRM/leads/${id}`);
+  revalidatePath("/ERP/leads");
+  revalidatePath(`/ERP/leads/${id}`);
 }
 
 export async function deleteLead(id: string) {
   const supabase = await createClient();
   await supabase.from("leads").update({ is_archived: true }).eq("id", id);
-  revalidatePath("/CRM/leads");
+  revalidatePath("/ERP/leads");
 }
 
 export async function restoreLead(id: string) {
   const supabase = await createClient();
   await supabase.from("leads").update({ is_archived: false }).eq("id", id);
-  revalidatePath("/CRM/leads");
+  revalidatePath("/ERP/leads");
 }
 
 export async function updateLeadStage(id: string, stageId: string, position: number) {
   const supabase = await createClient();
   await supabase.from("leads").update({ stage_id: stageId, position }).eq("id", id);
-  revalidatePath("/CRM/leads");
+  revalidatePath("/ERP/leads");
 }
 
 export async function getLeads(orgId: string, filters?: {
@@ -191,6 +191,6 @@ export async function assignLead(leadId: string, userId: string | null) {
     .update({ assigned_to: userId })
     .eq("id", leadId);
   if (error) throw error;
-  revalidatePath(`/CRM/leads/${leadId}`);
-  revalidatePath("/CRM/leads");
+  revalidatePath(`/ERP/leads/${leadId}`);
+  revalidatePath("/ERP/leads");
 }

@@ -46,7 +46,7 @@ export async function markAttendance(records: {
     .from("hr_attendance")
     .upsert(payload, { onConflict: "employee_id,date" });
   if (error) throw error;
-  revalidatePath("/CRM/hr/attendance");
+  revalidatePath("/ERP/hr/attendance");
 }
 
 export async function getAttendanceSummary(employeeId: string, month: string) {

@@ -80,7 +80,7 @@ export async function updateOrganization(id: string, data: {
   const { error } = await supabase.from("organizations").update(data).eq("id", id);
   if (error) throw error;
 
-  revalidatePath("/CRM/settings/organization");
+  revalidatePath("/ERP/settings/organization");
 }
 
 export async function updatePipelineStages(orgId: string, stages: { id?: string; name: string; color: string; position: number; is_won?: boolean; is_lost?: boolean }[]) {
@@ -107,6 +107,6 @@ export async function updatePipelineStages(orgId: string, stages: { id?: string;
     }
   }
 
-  revalidatePath("/CRM/settings/pipeline");
-  revalidatePath("/CRM/leads");
+  revalidatePath("/ERP/settings/pipeline");
+  revalidatePath("/ERP/leads");
 }

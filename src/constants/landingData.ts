@@ -3,7 +3,7 @@ import {
   CheckCircle2, BarChart2, Shield,
   Headphones, Package, Globe, TrendingUp,
   IndianRupee, BookOpen, Megaphone, Wallet, Store,
-  Building2, Zap
+  Building2, Zap, ClipboardList, Calendar
 } from "lucide-react";
 
 export const products = [
@@ -15,9 +15,21 @@ export const products = [
     color: "from-blue-500 to-indigo-600",
     iconBg: "bg-blue-50 text-blue-600",
     status: "beta" as const,
-    href: "/CRM/signup",
+    href: "/ERP/signup",
     cta: "Try Free — Beta Access",
     features: ["Lead pipeline", "GST invoicing", "PhonePe payments", "Team roles", "Push reminders"],
+  },
+  {
+    name: "NewBiz HR",
+    tagline: "Attendance, payroll & leave for small teams",
+    desc: "Manage employee attendance, run monthly payroll with PF/ESI deductions, and handle leave requests — without the complexity of traditional HR software.",
+    icon: Building2,
+    color: "from-cyan-500 to-blue-600",
+    iconBg: "bg-cyan-50 text-cyan-600",
+    status: "beta" as const,
+    href: "/ERP/signup",
+    cta: "Try Free — Beta Access",
+    features: ["Attendance & leave", "Payroll + PF/ESI", "Salary slips", "Department mgmt"],
   },
   {
     name: "NewBiz Books",
@@ -67,18 +79,6 @@ export const products = [
     cta: "Notify Me",
     features: ["Product catalogue", "Order management", "WhatsApp checkout", "Delivery tracking"],
   },
-  {
-    name: "NewBiz HR",
-    tagline: "Attendance, payroll & leave for small teams",
-    desc: "Manage employee attendance via mobile, run monthly payroll with PF/ESI deductions, and handle leave requests — all without HR software complexity.",
-    icon: Building2,
-    color: "from-cyan-500 to-blue-600",
-    iconBg: "bg-cyan-50 text-cyan-600",
-    status: "soon" as const,
-    href: "#notify",
-    cta: "Notify Me",
-    features: ["Attendance & leave", "Payroll + PF/ESI", "Salary slips", "Employee portal"],
-  },
 ];
 
 export const crmFeatures = [
@@ -89,58 +89,7 @@ export const crmFeatures = [
   { icon: CreditCard, title: "PhonePe Payments", desc: "Accept online payments, track dues, and mark paid in one click.", color: "bg-rose-50 text-rose-600" },
   { icon: BarChart2, title: "Reports & Insights", desc: "Pipeline value, conversion rates, revenue trends — real-time.", color: "bg-indigo-50 text-indigo-600" },
   { icon: Headphones, title: "Support Helpdesk", desc: "Manage customer tickets, set SLAs, and respond — no extra tool.", color: "bg-teal-50 text-teal-600" },
-  { icon: Package, title: "Product Catalogue", desc: "Maintain your product/service list. Add to invoices in one click.", color: "bg-orange-50 text-orange-600" },
-];
-
-export const plans = [
-  {
-    name: "Free",
-    price: "₹0",
-    period: "forever",
-    desc: "Get started, no risk",
-    borderColor: "border-gray-200",
-    badge: null,
-    highlight: false,
-    features: ["50 leads", "1 member", "5 invoices/mo", "Basic pipeline", "Push reminders"],
-    cta: "Start Free",
-    href: "/CRM/signup",
-  },
-  {
-    name: "Starter",
-    price: "₹999",
-    period: "/month",
-    desc: "For growing businesses",
-    borderColor: "border-blue-500",
-    badge: "Most Popular",
-    highlight: true,
-    features: ["500 leads", "3 members", "50 invoices/mo", "Reminders & pipeline", "Email templates", "WhatsApp & calling"],
-    cta: "Get Starter",
-    href: "/CRM/signup",
-  },
-  {
-    name: "Growth",
-    price: "₹2,499",
-    period: "/month",
-    desc: "For scaling teams",
-    borderColor: "border-purple-400",
-    badge: null,
-    highlight: false,
-    features: ["2,000 leads", "10 members", "200 invoices/mo", "All Starter features", "Webhooks & API", "Audit log"],
-    cta: "Start Growth",
-    href: "/CRM/signup",
-  },
-  {
-    name: "Pro",
-    price: "₹4,999",
-    period: "/month",
-    desc: "Unlimited everything",
-    borderColor: "border-gray-700",
-    badge: "Best Value",
-    highlight: false,
-    features: ["Unlimited leads", "Unlimited members", "Unlimited invoices", "All Growth features", "Priority support", "Custom branding"],
-    cta: "Go Pro",
-    href: "/CRM/signup",
-  },
+  { icon: Building2, title: "HR & Payroll", desc: "Mark attendance, approve leaves, and run payroll with PF/ESI deductions.", color: "bg-cyan-50 text-cyan-600" },
 ];
 
 export const whyUs = [
@@ -149,7 +98,7 @@ export const whyUs = [
   { icon: Shield, title: "Your data stays yours", desc: "Hosted on secure infrastructure. GDPR & data protection built in. We never sell your data." },
   { icon: Headphones, title: "Hand-holding support", desc: "We don't just give you a login. Our team sets it up with you, trains your staff, and checks in regularly." },
   { icon: Globe, title: "Works on every device", desc: "Full-featured PWA. Works on your laptop in the office and your phone in the field — even on slow networks." },
-  { icon: TrendingUp, title: "Grows with you", desc: "Start free on one product. Add more tools as you grow. Cancel any product, any time. No lock-in." },
+  { icon: TrendingUp, title: "Grows with you", desc: "Start free on one module. Add more as you grow. Cancel any module, any time. No lock-in." },
 ];
 
 export const testimonials = [
@@ -157,24 +106,24 @@ export const testimonials = [
     name: "Rajesh Sharma",
     role: "Owner, RS Electricals",
     city: "Jaipur",
-    product: "NewBiz CRM",
-    quote: "Before NewBiz CRM I was tracking leads in WhatsApp groups and a notebook. Now I close 40% more deals because nothing slips through.",
+    product: "NewBiz ERP",
+    quote: "Before NewBiz I was tracking leads in WhatsApp groups and a notebook. Now I close 40% more deals and my payroll runs itself.",
     stars: 5,
   },
   {
     name: "Priya Nair",
     role: "Founder, Bloom Events",
     city: "Kochi",
-    product: "NewBiz CRM",
-    quote: "The GST invoicing alone saved us ₹5,000/month on the CA bill. Everything is in one place and the team loves it.",
+    product: "NewBiz ERP",
+    quote: "The GST invoicing alone saved us ₹5,000/month on the CA bill. HR module handles our leaves too. Everything is in one place.",
     stars: 5,
   },
   {
     name: "Amit Desai",
     role: "Director, Desai Exports",
     city: "Surat",
-    product: "NewBiz CRM",
-    quote: "NewBiz actually helped us set up the whole thing. It wasn't just a tool sale — they walked us through every feature.",
+    product: "NewBiz ERP",
+    quote: "NewBiz actually helped us set up the whole thing. CRM, HR, invoicing — it wasn't just a tool sale, they walked us through every feature.",
     stars: 5,
   },
 ];

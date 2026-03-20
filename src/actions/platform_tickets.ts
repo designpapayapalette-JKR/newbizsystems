@@ -38,7 +38,7 @@ export async function createPlatformTicket(data: { type: string, subject: string
     description: data.description,
   });
   if (error) throw error;
-  revalidatePath("/CRM/settings/support");
+  revalidatePath("/ERP/settings/support");
 }
 
 export async function getPlatformTicketDetails(ticketId: string) {
@@ -92,8 +92,8 @@ export async function replyToPlatformTicket(ticketId: string, content: string) {
   // Update ticket updated_at
   await supabase.from("platform_tickets").update({ updated_at: new Date().toISOString() }).eq("id", ticketId);
   
-  revalidatePath(`/CRM/settings/support/${ticketId}`);
-  revalidatePath(`/CRM/admin/support/${ticketId}`);
+  revalidatePath(`/ERP/settings/support/${ticketId}`);
+  revalidatePath(`/ERP/admin/support/${ticketId}`);
 }
 
 // SUPER ADMIN ACTIONS
@@ -124,6 +124,6 @@ export async function updatePlatformTicketStatus(ticketId: string, status: strin
   const admin = await createServiceClient();
   const { error } = await admin.from("platform_tickets").update({ status, updated_at: new Date().toISOString() }).eq("id", ticketId);
   if (error) throw error;
-  revalidatePath(`/CRM/admin/support/${ticketId}`);
-  revalidatePath(`/CRM/admin/support`);
+  revalidatePath(`/ERP/admin/support/${ticketId}`);
+  revalidatePath(`/ERP/admin/support`);
 }

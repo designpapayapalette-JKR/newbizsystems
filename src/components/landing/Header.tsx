@@ -19,11 +19,11 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href="/CRM/login" className="hidden sm:inline-flex text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition-colors">
+          <Link href="/ERP/login" className="hidden sm:inline-flex text-sm text-gray-600 hover:text-gray-900 px-3 py-2 transition-colors">
             Sign In
           </Link>
           <Link
-            href="/CRM/signup"
+            href="/ERP/signup"
             className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
           >
             Try CRM Free <ArrowRight className="h-3.5 w-3.5" />

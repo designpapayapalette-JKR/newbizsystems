@@ -5,11 +5,11 @@ import { Users, CalendarCheck, FileText, IndianRupee } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { name: "Overview", href: "/CRM/hr", icon: BarChart2 }, // Assuming we import BarChart2 or just use text if we want. Let's just use text for simplicity or basic icons.
-  { name: "Directory", href: "/CRM/hr/employees", icon: Users },
-  { name: "Attendance", href: "/CRM/hr/attendance", icon: CalendarCheck },
-  { name: "Leaves", href: "/CRM/hr/leaves", icon: FileText },
-  { name: "Payroll", href: "/CRM/hr/payroll", icon: IndianRupee },
+  { name: "Overview", href: "/ERP/hr", icon: BarChart2 }, // Assuming we import BarChart2 or just use text if we want. Let's just use text for simplicity or basic icons.
+  { name: "Directory", href: "/ERP/hr/employees", icon: Users },
+  { name: "Attendance", href: "/ERP/hr/attendance", icon: CalendarCheck },
+  { name: "Leaves", href: "/ERP/hr/leaves", icon: FileText },
+  { name: "Payroll", href: "/ERP/hr/payroll", icon: IndianRupee },
 ];
 
 import { BarChart2 } from "lucide-react";

@@ -33,7 +33,7 @@ export function InvoiceList({ invoices }: { invoices: Invoice[] }) {
           <div key={inv.id} className="bg-white rounded-lg border p-4 flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <Link href={`/CRM/invoices/${inv.id}`} className="font-medium text-sm hover:text-primary">
+                <Link href={`/ERP/invoices/${inv.id}`} className="font-medium text-sm hover:text-primary">
                   {inv.invoice_number}
                 </Link>
                 <Badge variant={config.variant}>{config.label}</Badge>
@@ -49,7 +49,7 @@ export function InvoiceList({ invoices }: { invoices: Invoice[] }) {
               <span className="font-semibold">{formatCurrency(inv.total, inv.currency)}</span>
               <div className="flex gap-1">
                 <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-                  <Link href={`/CRM/invoices/${inv.id}/preview`} title="Preview">
+                  <Link href={`/ERP/invoices/${inv.id}/preview`} title="Preview">
                     <Eye className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -61,7 +61,7 @@ export function InvoiceList({ invoices }: { invoices: Invoice[] }) {
                 {inv.status !== 'cancelled' && (
                   <>
                     <Button asChild variant="ghost" size="icon" className="h-8 w-8" title="Edit Invoice">
-                      <Link href={`/CRM/invoices/${inv.id}/edit`}>
+                      <Link href={`/ERP/invoices/${inv.id}/edit`}>
                         <Pencil className="h-4 w-4" />
                       </Link>
                     </Button>

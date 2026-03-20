@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
         const payload = JSON.stringify({
           title: "Reminder: " + reminder.title,
           body: reminder.description ?? (reminder.lead ? `Lead: ${(reminder.lead as any).name}` : ""),
-          url: reminder.lead_id ? `/CRM/leads/${reminder.lead_id}` : "/CRM/reminders",
+          url: reminder.lead_id ? `/ERP/leads/${reminder.lead_id}` : "/ERP/reminders",
         });
 
         for (const sub of subs) {

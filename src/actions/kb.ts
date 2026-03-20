@@ -66,19 +66,19 @@ export async function createKbArticle(data: { title: string; slug: string; conte
   });
 
   if (error) throw error;
-  revalidatePath("/CRM/settings/knowledge-base");
+  revalidatePath("/ERP/settings/knowledge-base");
 }
 
 export async function updateKbArticle(id: string, data: Partial<KbArticle>) {
   const { supabase, orgId } = await getOrgAndUser();
   const { error } = await supabase.from("kb_articles").update({ ...data, updated_at: new Date().toISOString() }).eq("id", id).eq("organization_id", orgId);
   if (error) throw error;
-  revalidatePath("/CRM/settings/knowledge-base");
+  revalidatePath("/ERP/settings/knowledge-base");
 }
 
 export async function deleteKbArticle(id: string) {
   const { supabase, orgId } = await getOrgAndUser();
   const { error } = await supabase.from("kb_articles").delete().eq("id", id).eq("organization_id", orgId);
   if (error) throw error;
-  revalidatePath("/CRM/settings/knowledge-base");
+  revalidatePath("/ERP/settings/knowledge-base");
 }

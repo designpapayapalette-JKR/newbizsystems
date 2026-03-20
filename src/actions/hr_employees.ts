@@ -42,8 +42,8 @@ export async function createEmployee(data: {
   });
 
   if (error) throw error;
-  revalidatePath("/CRM/hr");
-  revalidatePath("/CRM/hr/employees");
+  revalidatePath("/ERP/hr");
+  revalidatePath("/ERP/hr/employees");
 }
 
 export async function updateEmployee(id: string, data: any) {
@@ -54,8 +54,8 @@ export async function updateEmployee(id: string, data: any) {
     .eq("id", id);
 
   if (error) throw error;
-  revalidatePath("/CRM/hr");
-  revalidatePath("/CRM/hr/employees");
+  revalidatePath("/ERP/hr");
+  revalidatePath("/ERP/hr/employees");
 }
 
 export async function deleteEmployee(id: string) {
@@ -66,6 +66,6 @@ export async function deleteEmployee(id: string) {
     .eq("id", id);
 
   if (error) throw error;
-  revalidatePath("/CRM/hr");
-  revalidatePath("/CRM/hr/employees");
+  revalidatePath("/ERP/hr");
+  revalidatePath("/ERP/hr/employees");
 }

@@ -17,7 +17,7 @@ export function PricingSection() {
         </p>
 
         <Link
-          href="/CRM/signup"
+          href="/ERP/signup"
           className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold px-8 py-4 rounded-xl transition-all shadow-xl shadow-blue-200 hover:shadow-blue-300 hover:-translate-y-0.5"
         >
           Create Your Free Account

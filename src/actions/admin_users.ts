@@ -43,7 +43,7 @@ export async function resetUserPassword(userId: string, newPassword: string) {
   });
   
   if (error) throw error;
-  revalidatePath("/CRM/admin/users");
+  revalidatePath("/ERP/admin/users");
 }
 
 export async function createPlatformUser(data: { email: string; password?: string; full_name: string; is_super_admin: boolean }) {
@@ -73,7 +73,7 @@ export async function createPlatformUser(data: { email: string; password?: strin
     throw profileError;
   }
   
-  revalidatePath("/CRM/admin/users");
+  revalidatePath("/ERP/admin/users");
   return newUserId;
 }
 
@@ -87,7 +87,7 @@ export async function updatePlatformUser(userId: string, data: { full_name?: str
   }).eq("id", userId);
   
   if (error) throw error;
-  revalidatePath("/CRM/admin/users");
+  revalidatePath("/ERP/admin/users");
 }
 
 export async function deletePlatformUser(userId: string) {
@@ -106,5 +106,5 @@ export async function deletePlatformUser(userId: string) {
   const { error } = await admin.auth.admin.deleteUser(userId);
   if (error) throw error;
   
-  revalidatePath("/CRM/admin/users");
+  revalidatePath("/ERP/admin/users");
 }

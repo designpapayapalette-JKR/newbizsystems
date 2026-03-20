@@ -20,7 +20,7 @@ export function LeadListView({ leads }: LeadListViewProps) {
         <div key={lead.id} className="bg-white rounded-lg border p-4 flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <Link href={`/CRM/leads/${lead.id}`} className="font-medium text-sm hover:text-primary">
+              <Link href={`/ERP/leads/${lead.id}`} className="font-medium text-sm hover:text-primary">
                 {lead.name}
               </Link>
               {lead.stage && (

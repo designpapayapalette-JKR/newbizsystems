@@ -21,7 +21,7 @@ export function UpcomingReminders({ reminders }: { reminders: Reminder[] }) {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">Upcoming Reminders</CardTitle>
-          <Link href="/CRM/reminders" className="text-xs text-primary hover:underline">View all</Link>
+          <Link href="/ERP/reminders" className="text-xs text-primary hover:underline">View all</Link>
         </div>
       </CardHeader>
       <CardContent>

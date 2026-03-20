@@ -22,18 +22,18 @@ export async function createProduct(data: { name: string; description?: string; 
   const { supabase, user, orgId } = await getOrg();
   const { error } = await supabase.from("products").insert({ ...data, organization_id: orgId, created_by: user.id });
   if (error) throw error;
-  revalidatePath("/CRM/settings/products");
+  revalidatePath("/ERP/settings/products");
 }
 
 export async function updateProduct(id: string, data: Partial<{ name: string; description: string; unit_price: number; currency: string; category: string; is_active: boolean }>) {
   const { supabase } = await getOrg();
   const { error } = await supabase.from("products").update(data).eq("id", id);
   if (error) throw error;
-  revalidatePath("/CRM/settings/products");
+  revalidatePath("/ERP/settings/products");
 }
 
 export async function deleteProduct(id: string) {
   const { supabase } = await getOrg();
   await supabase.from("products").update({ is_active: false }).eq("id", id);
-  revalidatePath("/CRM/settings/products");
+  revalidatePath("/ERP/settings/products");
 }

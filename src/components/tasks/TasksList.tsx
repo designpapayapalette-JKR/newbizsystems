@@ -61,7 +61,7 @@ export function TasksList({ tasks, done, showAssignee }: { tasks: Task[]; done?:
                 {formatRelative(task.occurred_at)}
               </span>
               {task.lead && (
-                <Link href={`/CRM/leads/${task.lead.id}`} className="flex items-center gap-1 text-xs text-primary hover:underline">
+                <Link href={`/ERP/leads/${task.lead.id}`} className="flex items-center gap-1 text-xs text-primary hover:underline">
                   <LinkIcon className="h-3 w-3" />
                   {task.lead.name}
                 </Link>

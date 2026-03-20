@@ -26,7 +26,7 @@ export async function createPayment(data: PaymentFormData) {
     .single();
 
   if (error) throw error;
-  revalidatePath("/CRM/payments");
+  revalidatePath("/ERP/payments");
   return payment;
 }
 
@@ -41,8 +41,8 @@ export async function updatePayment(id: string, data: Partial<PaymentFormData>) 
     .single();
 
   if (error) throw error;
-  revalidatePath("/CRM/payments");
-  revalidatePath(`/CRM/payments/${id}`);
+  revalidatePath("/ERP/payments");
+  revalidatePath(`/ERP/payments/${id}`);
   return payment;
 }
 
@@ -72,20 +72,20 @@ export async function markPaymentPaid(id: string) {
     }
   }
 
-  revalidatePath("/CRM/payments");
-  revalidatePath("/CRM/invoices");
+  revalidatePath("/ERP/payments");
+  revalidatePath("/ERP/invoices");
 }
 
 export async function updatePaymentStatus(id: string, status: PaymentStatus) {
   const supabase = await createClient();
   await supabase.from("payments").update({ status }).eq("id", id);
-  revalidatePath("/CRM/payments");
+  revalidatePath("/ERP/payments");
 }
 
 export async function deletePayment(id: string) {
   const supabase = await createClient();
   await supabase.from("payments").delete().eq("id", id);
-  revalidatePath("/CRM/payments");
+  revalidatePath("/ERP/payments");
 }
 
 export async function getPayments(orgId: string) {

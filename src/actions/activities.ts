@@ -45,8 +45,8 @@ export async function logActivity(
 
     await supabase.from("leads").update({ last_activity_at: new Date().toISOString() }).eq("id", leadId);
 
-    revalidatePath(`/CRM/leads/${leadId}`);
-    revalidatePath("/CRM/dashboard");
+    revalidatePath(`/ERP/leads/${leadId}`);
+    revalidatePath("/ERP/dashboard");
   } else {
     // Direct signature: logActivity({ lead_id, organization_id, type, ... })
     const directData = leadIdOrData;
@@ -60,8 +60,8 @@ export async function logActivity(
 
     await supabase.from("leads").update({ last_activity_at: new Date().toISOString() }).eq("id", directData.lead_id);
 
-    revalidatePath(`/CRM/leads/${directData.lead_id}`);
-    revalidatePath("/CRM/dashboard");
+    revalidatePath(`/ERP/leads/${directData.lead_id}`);
+    revalidatePath("/ERP/dashboard");
   }
 }
 
@@ -69,14 +69,14 @@ export async function updateActivity(id: string, data: { outcome?: string; title
   const supabase = await createClient();
   const { error } = await supabase.from("activities").update(data).eq("id", id);
   if (error) throw error;
-  revalidatePath("/CRM/tasks");
-  revalidatePath("/CRM/leads");
+  revalidatePath("/ERP/tasks");
+  revalidatePath("/ERP/leads");
 }
 
 export async function deleteActivity(id: string, leadId: string) {
   const supabase = await createClient();
   await supabase.from("activities").delete().eq("id", id);
-  revalidatePath(`/CRM/leads/${leadId}`);
+  revalidatePath(`/ERP/leads/${leadId}`);
 }
 
 export async function getMyTasks(userId: string, orgId: string) {

@@ -2,10 +2,16 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // ─── Backward-compat: redirect all old /CRM/ links to /ERP/ ───────────────
+  if (pathname.startsWith("/CRM")) {
+    const newPath = pathname.replace(/^\/CRM/, "/ERP");
+    return NextResponse.redirect(new URL(newPath + request.nextUrl.search, request.url));
+  }
+
   let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request: { headers: request.headers },
   });
 
   const supabase = createServerClient(
@@ -17,38 +23,14 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
+          request.cookies.set({ name, value, ...options });
+          response = NextResponse.next({ request: { headers: request.headers } });
+          response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: "",
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value: "",
-            ...options,
-          });
+          request.cookies.set({ name, value: "", ...options });
+          response = NextResponse.next({ request: { headers: request.headers } });
+          response.cookies.set({ name, value: "", ...options });
         },
       },
     }
@@ -56,33 +38,33 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const isAuthPage = request.nextUrl.pathname.startsWith("/CRM/login") || 
-                     request.nextUrl.pathname.startsWith("/CRM/signup");
-  const isPublicPage = request.nextUrl.pathname === "/" ||
-                       request.nextUrl.pathname.startsWith("/privacy") ||
-                       request.nextUrl.pathname.startsWith("/terms") ||
-                       request.nextUrl.pathname.startsWith("/refund-policy") ||
-                       request.nextUrl.pathname.startsWith("/api/webhooks") ||
-                       request.nextUrl.pathname.startsWith("/favicon.ico");
+  const isAuthPage = pathname.startsWith("/ERP/login") ||
+                     pathname.startsWith("/ERP/signup");
+  const isPublicPage = pathname === "/" ||
+                       pathname.startsWith("/privacy") ||
+                       pathname.startsWith("/terms") ||
+                       pathname.startsWith("/refund-policy") ||
+                       pathname.startsWith("/api/webhooks") ||
+                       pathname.startsWith("/favicon.ico");
 
-  // CRM root redirect
-  if (request.nextUrl.pathname === "/CRM") {
-    return NextResponse.redirect(new URL("/CRM/dashboard", request.url));
+  // ERP root redirect
+  if (pathname === "/ERP") {
+    return NextResponse.redirect(new URL("/ERP/dashboard", request.url));
   }
 
-  // 1. Redirect unauthenticated users from protected pages to CRM login
+  // 1. Redirect unauthenticated users from protected pages to login
   if (!user && !isAuthPage && !isPublicPage) {
-    return NextResponse.redirect(new URL("/CRM/login", request.url));
+    return NextResponse.redirect(new URL("/ERP/login", request.url));
   }
 
-  // 2. Redirect authenticated users from CRM login/signup to dashboard
+  // 2. Redirect authenticated users from login/signup to dashboard
   if (user && isAuthPage) {
-    return NextResponse.redirect(new URL("/CRM/dashboard", request.url));
+    return NextResponse.redirect(new URL("/ERP/dashboard", request.url));
   }
 
   // 3. Enforce onboarding for authenticated users
-  const isOnboarding = request.nextUrl.pathname.startsWith("/CRM/onboarding");
-  const isInvite = request.nextUrl.pathname.startsWith("/CRM/invite");
+  const isOnboarding = pathname.startsWith("/ERP/onboarding");
+  const isInvite = pathname.startsWith("/ERP/invite");
 
   if (user && !isPublicPage && !isOnboarding && !isInvite) {
     const { data: profile } = await supabase
@@ -92,7 +74,7 @@ export async function middleware(request: NextRequest) {
       .single();
 
     if (!profile?.current_org_id) {
-      return NextResponse.redirect(new URL("/CRM/onboarding", request.url));
+      return NextResponse.redirect(new URL("/ERP/onboarding", request.url));
     }
   }
 

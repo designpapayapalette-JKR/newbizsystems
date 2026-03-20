@@ -39,7 +39,7 @@ export async function createTicket(data: {
     created_by: user.id,
   }).select().single();
   if (error) throw error;
-  revalidatePath("/CRM/tickets");
+  revalidatePath("/ERP/tickets");
   return ticket;
 }
 
@@ -49,15 +49,15 @@ export async function updateTicket(id: string, data: { title?: string; descripti
   if (data.status === "resolved" || data.status === "closed") update.resolved_at = new Date().toISOString();
   const { error } = await supabase.from("tickets").update(update).eq("id", id);
   if (error) throw error;
-  revalidatePath("/CRM/tickets");
-  revalidatePath(`/CRM/tickets/${id}`);
+  revalidatePath("/ERP/tickets");
+  revalidatePath(`/ERP/tickets/${id}`);
 }
 
 export async function addTicketComment(ticketId: string, body: string, isInternal = false) {
   const { supabase, user } = await getOrgAndUser();
   const { error } = await supabase.from("ticket_comments").insert({ ticket_id: ticketId, user_id: user.id, body, is_internal: isInternal });
   if (error) throw error;
-  revalidatePath(`/CRM/tickets/${ticketId}`);
+  revalidatePath(`/ERP/tickets/${ticketId}`);
 }
 
 export async function getTickets(filters?: { status?: string; priority?: string; assigned_to?: string }) {

@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const { paymentId, amount, currency, phone } = await req.json();
   if (!paymentId || !amount) return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
 
-  const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/CRM/payments/${paymentId}?status=return`;
+  const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/ERP/payments/${paymentId}?status=return`;
 
   const result = await initiatePhonePePayment({
     merchantOrderId: paymentId,

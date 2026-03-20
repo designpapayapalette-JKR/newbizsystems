@@ -50,6 +50,6 @@ export async function createMacro(title: string, content_template: string) {
     .single();
 
   if (error) throw error;
-  revalidatePath("/CRM/tickets/[id]", "page"); 
+  revalidatePath("/ERP/tickets/[id]", "page"); 
   return data as TicketMacro;
 }
