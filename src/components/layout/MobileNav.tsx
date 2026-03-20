@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Bell, CreditCard, FileText, CheckSquare, Headphones, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Users, Bell, CreditCard, FileText, CheckSquare, Headphones, MessageSquare, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types";
 
@@ -14,6 +14,7 @@ const allTabs = [
   { href: "/CRM/messages",  label: "Messages",   icon: MessageSquare,   roles: ["owner","admin","member"] },
   { href: "/CRM/payments",  label: "Payments",   icon: CreditCard,      roles: ["owner","admin"] },
   { href: "/CRM/invoices",  label: "Invoices",   icon: FileText,        roles: ["owner","admin"] },
+  { href: "/CRM/hr",        label: "HR & Payroll",icon: Briefcase,      roles: ["owner","admin"] },
 ];
 
 export function MobileNav({ userRole }: { userRole: Role }) {

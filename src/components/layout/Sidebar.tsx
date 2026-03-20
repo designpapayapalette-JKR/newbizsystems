@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Users, Bell, CreditCard, FileText,
-  Settings, LogOut, Building2, CheckSquare, Headphones, BarChart2, MessageSquare, Shield, BookOpen, LifeBuoy
+  Settings, LogOut, Briefcase, Building2, CheckSquare, Headphones, BarChart2, MessageSquare, Shield, BookOpen, LifeBuoy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +22,7 @@ const allNavItems = [
   { href: "/CRM/reports",           label: "Reports",     icon: BarChart2,       roles: ["owner","admin"] },
   { href: "/CRM/payments",          label: "Payments",    icon: CreditCard,      roles: ["owner","admin"] },
   { href: "/CRM/invoices",          label: "Invoices",    icon: FileText,        roles: ["owner","admin"] },
+  { href: "/CRM/hr",                label: "HR & Payroll",icon: Briefcase,       roles: ["owner","admin"] },
   { href: "/CRM/settings/profile",  label: "Settings",    icon: Settings,        roles: ["owner","admin","member"] },
 ];
 
