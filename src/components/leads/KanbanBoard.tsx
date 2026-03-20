@@ -38,7 +38,7 @@ function LeadCard({ lead, isDragging, dragHandleProps }: {
       >
         <GripVertical className="h-3.5 w-3.5 text-gray-300 shrink-0" />
         <Link
-          href={`/leads/${lead.id}`}
+          href={`/CRM/leads/${lead.id}`}
           className="font-medium text-sm hover:text-primary line-clamp-1 flex-1"
           onClick={(e) => e.stopPropagation()}
         >
@@ -108,7 +108,7 @@ function LeadCard({ lead, isDragging, dragHandleProps }: {
             </a>
           )}
           <Link
-            href={`/leads/${lead.id}`}
+            href={`/CRM/leads/${lead.id}`}
             className="ml-auto text-xs text-primary hover:underline"
           >
             Open →

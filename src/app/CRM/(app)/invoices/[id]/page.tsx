@@ -32,7 +32,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         actions={
           <div className="flex gap-2">
             <Button asChild variant="outline" size="sm">
-              <Link href={`/invoices/${id}/preview`}>
+              <Link href={`/CRM/invoices/${id}/preview`}>
                 <Eye className="h-4 w-4" /> Preview
               </Link>
             </Button>

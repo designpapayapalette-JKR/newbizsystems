@@ -239,14 +239,14 @@ export async function updateInvoice(id: string, data: Partial<InvoiceFormData>) 
   }
 
   revalidatePath("/CRM/invoices");
-  revalidatePath(`/invoices/${id}`);
+  revalidatePath(`/CRM/invoices/${id}`);
 }
 
 export async function updateInvoiceStatus(id: string, status: string) {
   const supabase = await createClient();
   await supabase.from("invoices").update({ status }).eq("id", id);
   revalidatePath("/CRM/invoices");
-  revalidatePath(`/invoices/${id}`);
+  revalidatePath(`/CRM/invoices/${id}`);
 }
 
 export async function deleteInvoice(id: string) {

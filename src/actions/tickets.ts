@@ -50,14 +50,14 @@ export async function updateTicket(id: string, data: { title?: string; descripti
   const { error } = await supabase.from("tickets").update(update).eq("id", id);
   if (error) throw error;
   revalidatePath("/CRM/tickets");
-  revalidatePath(`/tickets/${id}`);
+  revalidatePath(`/CRM/tickets/${id}`);
 }
 
 export async function addTicketComment(ticketId: string, body: string, isInternal = false) {
   const { supabase, user } = await getOrgAndUser();
   const { error } = await supabase.from("ticket_comments").insert({ ticket_id: ticketId, user_id: user.id, body, is_internal: isInternal });
   if (error) throw error;
-  revalidatePath(`/tickets/${ticketId}`);
+  revalidatePath(`/CRM/tickets/${ticketId}`);
 }
 
 export async function getTickets(filters?: { status?: string; priority?: string; assigned_to?: string }) {

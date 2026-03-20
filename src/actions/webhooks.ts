@@ -20,20 +20,20 @@ export async function createWebhook(data: { name: string; url: string; events: s
   const { supabase, orgId } = await getOrg();
   const { error } = await supabase.from("webhooks").insert({ ...data, organization_id: orgId });
   if (error) throw error;
-  revalidatePath("/settings/webhooks");
+  revalidatePath("/CRM/settings/webhooks");
 }
 
 export async function updateWebhook(id: string, data: Partial<{ name: string; url: string; events: string[]; is_active: boolean; secret: string }>) {
   const { supabase } = await getOrg();
   const { error } = await supabase.from("webhooks").update(data).eq("id", id);
   if (error) throw error;
-  revalidatePath("/settings/webhooks");
+  revalidatePath("/CRM/settings/webhooks");
 }
 
 export async function deleteWebhook(id: string) {
   const { supabase } = await getOrg();
   await supabase.from("webhooks").delete().eq("id", id);
-  revalidatePath("/settings/webhooks");
+  revalidatePath("/CRM/settings/webhooks");
 }
 
 // Called server-side to fire webhooks for an event

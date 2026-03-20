@@ -43,5 +43,5 @@ export async function resetUserPassword(userId: string, newPassword: string) {
   });
   
   if (error) throw error;
-  revalidatePath("/admin/users");
+  revalidatePath("/CRM/admin/users");
 }

@@ -27,7 +27,7 @@ export default async function InvoicePreviewPage({ params }: { params: Promise<{
     <div className="flex flex-col h-full">
       <TopBar title="Invoice Preview" />
       <div className="flex-1 overflow-y-auto p-4">
-        <Link href={`/invoices/${id}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Link href={`/CRM/invoices/${id}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4" /> Back
         </Link>
         <InvoicePreviewClient invoiceId={id} invoiceNumber={invoice.invoice_number} defaultTemplate={defaultTemplate} />

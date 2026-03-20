@@ -84,7 +84,7 @@ export async function updateLead(id: string, data: Partial<LeadFormData>) {
   }
 
   revalidatePath("/CRM/leads");
-  revalidatePath(`/leads/${id}`);
+  revalidatePath(`/CRM/leads/${id}`);
 }
 
 export async function deleteLead(id: string) {
@@ -191,6 +191,6 @@ export async function assignLead(leadId: string, userId: string | null) {
     .update({ assigned_to: userId })
     .eq("id", leadId);
   if (error) throw error;
-  revalidatePath(`/leads/${leadId}`);
+  revalidatePath(`/CRM/leads/${leadId}`);
   revalidatePath("/CRM/leads");
 }

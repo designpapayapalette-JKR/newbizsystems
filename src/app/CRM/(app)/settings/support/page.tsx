@@ -32,7 +32,7 @@ export default async function SettingsSupportPage() {
             {tickets.map(t => (
                <tr key={t.id} className="hover:bg-gray-50">
                 <td className="px-5 py-3 font-medium">
-                  <Link href={`/settings/support/${t.id}`} className="hover:text-blue-600 block truncate max-w-sm">
+                  <Link href={`/CRM/settings/support/${t.id}`} className="hover:text-blue-600 block truncate max-w-sm">
                     {t.subject}
                   </Link>
                 </td>

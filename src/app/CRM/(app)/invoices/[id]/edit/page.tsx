@@ -42,7 +42,7 @@ export default async function EditInvoicePage({
     <div className="flex flex-col h-full">
       <TopBar title={`Edit Invoice ${invoice.invoice_number}`} />
       <div className="flex-1 overflow-y-auto p-4">
-        <Link href={`/invoices/${invoice.id}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Link href={`/CRM/invoices/${invoice.id}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4" />
           Back to Invoice
         </Link>

@@ -134,7 +134,7 @@ export async function assignSubscription(orgId: string, planId: string, opts: {
 
   if (error) throw error;
   revalidatePath("/CRM/admin");
-  revalidatePath("/settings/billing");
+  revalidatePath("/CRM/settings/billing");
 }
 
 export async function updateSubscriptionStatus(orgId: string, status: "trialing" | "active" | "past_due" | "cancelled" | "expired", notes?: string) {
@@ -148,7 +148,7 @@ export async function updateSubscriptionStatus(orgId: string, status: "trialing"
   const { error } = await admin.from("org_subscriptions").update(update).eq("organization_id", orgId);
   if (error) throw error;
   revalidatePath("/CRM/admin");
-  revalidatePath("/settings/billing");
+  revalidatePath("/CRM/settings/billing");
 }
 
 export async function createPlan(data: Omit<SubscriptionPlan, "id">) {
@@ -165,7 +165,7 @@ export async function updatePlan(id: string, data: Partial<Omit<SubscriptionPlan
   const { error } = await admin.from("subscription_plans").update({ ...data, updated_at: new Date().toISOString() }).eq("id", id);
   if (error) throw error;
   revalidatePath("/CRM/admin");
-  revalidatePath("/settings/billing");
+  revalidatePath("/CRM/settings/billing");
 }
 
 export async function deletePlan(id: string) {

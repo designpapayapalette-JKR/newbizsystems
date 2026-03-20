@@ -23,7 +23,7 @@ export function TopBar({ title, subtitle, actions }: TopBarProps) {
             <Bell className="h-4 w-4" />
           </Button>
         </Link>
-        <Link href="/settings/profile" className="md:hidden">
+        <Link href="/CRM/settings/profile" className="md:hidden">
           <Button variant="ghost" size="icon">
             <Settings className="h-4 w-4" />
           </Button>

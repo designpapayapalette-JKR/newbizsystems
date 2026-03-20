@@ -25,7 +25,7 @@ export async function completeReminder(id: string) {
   await supabase.from("reminders").update({ is_completed: true, completed_at: new Date().toISOString() }).eq("id", id);
   revalidatePath("/CRM/reminders");
   revalidatePath("/CRM/dashboard");
-  if (data?.lead_id) revalidatePath(`/leads/${data.lead_id}`);
+  if (data?.lead_id) revalidatePath(`/CRM/leads/${data.lead_id}`);
 }
 
 export async function deleteReminder(id: string) {
@@ -33,7 +33,7 @@ export async function deleteReminder(id: string) {
   const { data } = await supabase.from("reminders").select("lead_id").eq("id", id).single();
   await supabase.from("reminders").delete().eq("id", id);
   revalidatePath("/CRM/reminders");
-  if (data?.lead_id) revalidatePath(`/leads/${data.lead_id}`);
+  if (data?.lead_id) revalidatePath(`/CRM/leads/${data.lead_id}`);
 }
 
 export async function updateReminder(id: string, data: Partial<ReminderFormData>) {

@@ -5,10 +5,10 @@ import { Shield } from "lucide-react";
 
 const adminNav = [
   { href: "/CRM/admin", label: "Overview" },
-  { href: "/admin/organizations", label: "Organizations" },
-  { href: "/admin/plans", label: "Subscription Plans" },
-  { href: "/admin/users", label: "Users" },
-  { href: "/admin/support", label: "Support Tickets" },
+  { href: "/CRM/admin/organizations", label: "Organizations" },
+  { href: "/CRM/admin/plans", label: "Subscription Plans" },
+  { href: "/CRM/admin/users", label: "Users" },
+  { href: "/CRM/admin/support", label: "Support Tickets" },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

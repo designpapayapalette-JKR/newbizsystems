@@ -42,7 +42,7 @@ export async function updatePayment(id: string, data: Partial<PaymentFormData>) 
 
   if (error) throw error;
   revalidatePath("/CRM/payments");
-  revalidatePath(`/payments/${id}`);
+  revalidatePath(`/CRM/payments/${id}`);
   return payment;
 }
 

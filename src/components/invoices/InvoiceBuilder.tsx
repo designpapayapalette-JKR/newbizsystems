@@ -143,11 +143,11 @@ export function InvoiceBuilder({
       if (invoice) {
         await updateInvoice(invoice.id, payload);
         toast.success("Invoice updated!");
-        router.push(`/invoices/${invoice.id}`);
+        router.push(`/CRM/invoices/${invoice.id}`);
       } else {
         const newInvoice = await createInvoice(payload);
         toast.success("Invoice created!");
-        router.push(`/invoices/${newInvoice.id}`);
+        router.push(`/CRM/invoices/${newInvoice.id}`);
       }
     } catch (err: any) {
       toast.error(err.message || (invoice ? "Failed to update invoice" : "Failed to create invoice"));

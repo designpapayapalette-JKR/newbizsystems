@@ -29,7 +29,7 @@ export default async function AdminSupportPage() {
             {tickets.map((t) => (
               <tr key={t.id} className="hover:bg-gray-50">
                 <td className="px-5 py-3 font-medium">
-                  <Link href={`/admin/support/${t.id}`} className="hover:text-amber-600 truncate block max-w-xs">
+                  <Link href={`/CRM/admin/support/${t.id}`} className="hover:text-amber-600 truncate block max-w-xs">
                     {t.subject}
                   </Link>
                 </td>

@@ -24,7 +24,7 @@ export async function inviteTeamMember(email: string, role: Role = "member") {
   });
 
   if (error) throw error;
-  revalidatePath("/settings/team");
+  revalidatePath("/CRM/settings/team");
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   return { token, inviteUrl: `${appUrl}/invite/${token}` };
@@ -46,7 +46,7 @@ export async function getPendingInvites(orgId: string) {
 export async function revokeInvite(inviteId: string) {
   const supabase = await createClient();
   await supabase.from("org_invites").delete().eq("id", inviteId);
-  revalidatePath("/settings/team");
+  revalidatePath("/CRM/settings/team");
 }
 
 export async function acceptInvite(token: string) {
@@ -100,13 +100,13 @@ export async function acceptInvite(token: string) {
 export async function updateMemberRole(orgId: string, userId: string, role: Role) {
   const supabase = await createClient();
   await supabase.from("organization_members").update({ role }).eq("organization_id", orgId).eq("user_id", userId);
-  revalidatePath("/settings/team");
+  revalidatePath("/CRM/settings/team");
 }
 
 export async function removeMember(orgId: string, userId: string) {
   const supabase = await createClient();
   await supabase.from("organization_members").delete().eq("organization_id", orgId).eq("user_id", userId);
-  revalidatePath("/settings/team");
+  revalidatePath("/CRM/settings/team");
 }
 
 export async function getTeamMembers(orgId: string) {
@@ -161,5 +161,5 @@ export async function assignTask(data: {
 
   if (error) throw error;
   revalidatePath("/CRM/tasks");
-  revalidatePath("/settings/team");
+  revalidatePath("/CRM/settings/team");
 }

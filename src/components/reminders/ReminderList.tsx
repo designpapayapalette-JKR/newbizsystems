@@ -49,7 +49,7 @@ function ReminderItem({ reminder, showComplete = true }: { reminder: Reminder; s
             {formatRelative(reminder.due_at)}
           </span>
           {(reminder as any).lead && (
-            <Link href={`/leads/${(reminder as any).lead.id}`} className="text-xs text-primary hover:underline flex items-center gap-1">
+            <Link href={`/CRM/leads/${(reminder as any).lead.id}`} className="text-xs text-primary hover:underline flex items-center gap-1">
               <LinkIcon className="h-3 w-3" />
               {(reminder as any).lead.name}
             </Link>

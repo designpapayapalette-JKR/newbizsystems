@@ -16,7 +16,7 @@ export default async function SettingsTicketDetailsPage({ params }: { params: Pr
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/settings/support" className="p-2 hover:bg-gray-200 rounded-full transition-colors">
+        <Link href="/CRM/settings/support" className="p-2 hover:bg-gray-200 rounded-full transition-colors">
           <ChevronLeft className="h-5 w-5 text-gray-600" />
         </Link>
         <div>

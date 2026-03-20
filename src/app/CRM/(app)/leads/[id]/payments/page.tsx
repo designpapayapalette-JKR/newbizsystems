@@ -84,7 +84,7 @@ export default async function LeadPaymentsPage({ params }: { params: Promise<{ i
                     </div>
                     <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                       {(p as any).invoice && (
-                        <Link href={`/invoices/${(p as any).invoice.id}`} className="hover:text-primary">
+                        <Link href={`/CRM/invoices/${(p as any).invoice.id}`} className="hover:text-primary">
                           {(p as any).invoice.invoice_number}
                         </Link>
                       )}

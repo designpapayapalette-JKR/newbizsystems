@@ -99,7 +99,7 @@ export default async function TicketsPage({
             {tickets.map((ticket: any) => (
               <Link
                 key={ticket.id}
-                href={`/tickets/${ticket.id}`}
+                href={`/CRM/tickets/${ticket.id}`}
                 className="block bg-white border rounded-lg px-4 py-3 hover:shadow-sm transition-shadow"
               >
                 <div className="flex items-start justify-between gap-3">

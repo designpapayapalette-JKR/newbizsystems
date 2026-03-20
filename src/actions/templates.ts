@@ -20,18 +20,18 @@ export async function createEmailTemplate(data: { name: string; subject: string;
   const { supabase, user, orgId } = await getOrg();
   const { error } = await supabase.from("email_templates").insert({ ...data, organization_id: orgId, created_by: user.id });
   if (error) throw error;
-  revalidatePath("/settings/templates");
+  revalidatePath("/CRM/settings/templates");
 }
 
 export async function updateEmailTemplate(id: string, data: { name?: string; subject?: string; body?: string; category?: string }) {
   const { supabase } = await getOrg();
   const { error } = await supabase.from("email_templates").update(data).eq("id", id);
   if (error) throw error;
-  revalidatePath("/settings/templates");
+  revalidatePath("/CRM/settings/templates");
 }
 
 export async function deleteEmailTemplate(id: string) {
   const { supabase } = await getOrg();
   await supabase.from("email_templates").delete().eq("id", id);
-  revalidatePath("/settings/templates");
+  revalidatePath("/CRM/settings/templates");
 }

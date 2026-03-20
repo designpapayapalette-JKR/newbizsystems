@@ -33,7 +33,7 @@ export default async function InvoicesPage() {
         title="Invoices"
         actions={
           <Button asChild size="sm">
-            <Link href="/invoices/new">+ New Invoice</Link>
+            <Link href="/CRM/invoices/new">+ New Invoice</Link>
           </Button>
         }
       />

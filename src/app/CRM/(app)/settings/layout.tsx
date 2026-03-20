@@ -1,18 +1,18 @@
 import Link from "next/link";
 
 const settingsNav = [
-  { href: "/settings/profile", label: "Profile" },
-  { href: "/settings/organization", label: "Organization" },
-  { href: "/settings/team", label: "Team" },
-  { href: "/settings/billing", label: "Billing & Plan" },
-  { href: "/settings/pipeline", label: "Pipeline Stages" },
-  { href: "/settings/knowledge-base", label: "Knowledge Base" },
-  { href: "/settings/support", label: "Help Center / Support" },
-  { href: "/settings/notifications", label: "Notifications" },
-  { href: "/settings/products", label: "Products & Services" },
-  { href: "/settings/templates", label: "Email Templates" },
-  { href: "/settings/webhooks", label: "Webhooks" },
-  { href: "/settings/audit", label: "Audit Log" },
+  { href: "/CRM/settings/profile", label: "Profile" },
+  { href: "/CRM/settings/organization", label: "Organization" },
+  { href: "/CRM/settings/team", label: "Team" },
+  { href: "/CRM/settings/billing", label: "Billing & Plan" },
+  { href: "/CRM/settings/pipeline", label: "Pipeline Stages" },
+  { href: "/CRM/settings/knowledge-base", label: "Knowledge Base" },
+  { href: "/CRM/settings/support", label: "Help Center / Support" },
+  { href: "/CRM/settings/notifications", label: "Notifications" },
+  { href: "/CRM/settings/products", label: "Products & Services" },
+  { href: "/CRM/settings/templates", label: "Email Templates" },
+  { href: "/CRM/settings/webhooks", label: "Webhooks" },
+  { href: "/CRM/settings/audit", label: "Audit Log" },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
