@@ -256,7 +256,11 @@ export async function updateInvoiceStatus(id: string, status: string) {
 
 export async function deleteInvoice(id: string) {
   const supabase = await createClient();
-  await supabase.from("invoices").update({ status: "cancelled" }).eq("id", id);
+  const { error } = await supabase
+    .from("invoices")
+    .update({ status: "cancelled" })
+    .eq("id", id);
+  if (error) throw error;
   revalidatePath("/ERP/invoices");
 }
 

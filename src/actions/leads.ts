@@ -232,3 +232,50 @@ export async function assignLead(leadId: string, userId: string | null) {
   revalidatePath(`/ERP/leads/${leadId}`);
   revalidatePath("/ERP/leads");
 }
+
+export async function convertToCustomer(leadId: string) {
+  const supabase = await createClient();
+  const { orgId } = await getOrgId();
+  
+  // 1. Fetch lead details
+  const { data: lead, error: fetchErr } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", leadId)
+    .single();
+    
+  if (fetchErr || !lead) throw new Error("Lead not found");
+  
+  // 2. Insert into customers
+  const { data: customer, error: insertErr } = await supabase
+    .from("customers")
+    .insert({
+      organization_id: orgId,
+      name: lead.name,
+      company: lead.company,
+      email: lead.email,
+      phone: lead.phone,
+      gstin: lead.gstin,
+      address: lead.address,
+      state: lead.state,
+      state_code: lead.state_code,
+      pan: lead.pan,
+      website: lead.website,
+      source_lead_id: lead.id,
+      status: "active"
+    })
+    .select()
+    .single();
+    
+  if (insertErr) throw insertErr;
+  
+  // 3. Update lead status to reflect conversion
+  await supabase.from("leads").update({ status: "converted" }).eq("id", leadId);
+  
+  // 4. Link existing invoices of this lead to the new customer record
+  await supabase.from("invoices").update({ customer_id: customer.id }).eq("lead_id", leadId);
+  
+  revalidatePath("/ERP/leads");
+  revalidatePath("/ERP/customers");
+  return customer;
+}

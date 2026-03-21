@@ -18,7 +18,8 @@ const navGroups = [
     label: "Sales & CRM",
     items: [
       { href: "/ERP/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["owner","admin","member"] },
-      { href: "/ERP/leads",     label: "Leads",     icon: Users,           roles: ["owner","admin","member"], departments: ["Sales"] },
+      { href: "/ERP/leads",     label: "Leads",     icon: Users,           roles: ["owner","admin","member"] },
+      { href: "/ERP/customers", label: "Customers", icon: Briefcase,           roles: ["owner","admin","member"] },
       { href: "/ERP/tasks",     label: "Tasks",     icon: CheckSquare,     roles: ["owner","admin","member"] },
     ],
   },

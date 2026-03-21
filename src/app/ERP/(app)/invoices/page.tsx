@@ -8,6 +8,8 @@ import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+import { InvoiceCsvExport } from "@/components/invoices/InvoiceCsvExport";
+
 export default async function InvoicesPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -32,9 +34,12 @@ export default async function InvoicesPage() {
       <TopBar
         title="Invoices"
         actions={
-          <Button asChild size="sm">
-            <Link href="/ERP/invoices/new">+ New Invoice</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <InvoiceCsvExport invoices={invoices as any[]} />
+            <Button asChild size="sm">
+              <Link href="/ERP/invoices/new">+ New Invoice</Link>
+            </Button>
+          </div>
         }
       />
       <div className="flex-1 overflow-y-auto p-4">

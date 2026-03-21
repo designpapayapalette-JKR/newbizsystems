@@ -101,7 +101,7 @@ export async function deleteEmployee(id: string) {
   const supabase = await createClient();
   const { error } = await supabase
     .from("hr_employees")
-    .delete()
+    .update({ status: "deleted" })
     .eq("id", id);
 
   if (error) throw error;

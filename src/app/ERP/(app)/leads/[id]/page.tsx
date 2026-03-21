@@ -11,6 +11,7 @@ import { LeadDeleteButton } from "@/components/leads/LeadDeleteButton";
 import { QuickNoteForm } from "@/components/leads/QuickNoteForm";
 import { AddReminderDialog } from "@/components/leads/AddReminderDialog";
 import { AssignLeadDialog } from "@/components/leads/AssignLeadDialog";
+import { ConvertToCustomerButton } from "@/components/leads/ConvertToCustomerButton";
 import { TopBar } from "@/components/layout/TopBar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,6 +68,9 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
                 currentAssigneeId={(lead as any).assigned_to ?? null}
                 members={teamMembers as any[]}
               />
+            )}
+            {lead.status === "won" && (
+                <ConvertToCustomerButton leadId={lead.id} leadName={lead.name} />
             )}
             <LeadFormDialog
               stages={stages}
