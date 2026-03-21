@@ -38,24 +38,48 @@ export async function createEmployee(data: {
   const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
   if (!profile?.current_org_id) throw new Error("No organization selected");
 
-  const { error } = await supabase.from("hr_employees").insert({
-    ...data,
+  const insertData: Record<string, any> = {
     organization_id: profile.current_org_id,
-  });
+  };
 
-  if (error) throw error;
+  // Strip empty strings and undefined values to avoid DB constraint failures on optional columns
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== "" && value !== null && value !== undefined) {
+      insertData[key] = value;
+    }
+  }
+
+  const { error } = await supabase.from("hr_employees").insert(insertData);
+
+  if (error) {
+    console.error("Employee Creation Error:", error);
+    throw new Error(error.message);
+  }
   revalidatePath("/ERP/hr");
   revalidatePath("/ERP/hr/employees");
 }
 
 export async function updateEmployee(id: string, data: any) {
   const supabase = await createClient();
+  
+  const updateData: Record<string, any> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== "" && value !== undefined) {
+      updateData[key] = value;
+    } else if (value === "") {
+      updateData[key] = null; // empty strings on edit should clear the field
+    }
+  }
+
   const { error } = await supabase
     .from("hr_employees")
-    .update(data)
+    .update(updateData)
     .eq("id", id);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Employee Update Error:", error);
+    throw new Error(error.message);
+  }
   revalidatePath("/ERP/hr");
   revalidatePath("/ERP/hr/employees");
 }
