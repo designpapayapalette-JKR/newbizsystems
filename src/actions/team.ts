@@ -59,7 +59,7 @@ export async function acceptInvite(token: string) {
     .select("*")
     .eq("token", token)
     .is("accepted_at", null)
-    .single();
+    .maybeSingle();
 
   if (error || !invite) throw new Error("Invalid or expired invite");
   if (new Date(invite.expires_at) < new Date()) throw new Error("Invite has expired");
@@ -132,7 +132,7 @@ export async function getOrgRole(userId: string, orgId: string): Promise<Role> {
     .select("role")
     .eq("organization_id", orgId)
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
   return (data?.role as Role) ?? "member";
 }
 
