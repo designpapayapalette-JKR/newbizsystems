@@ -33,7 +33,13 @@ export async function getOrgId() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("current_org_id")
+    .eq("id", user.id)
+    .maybeSingle();
+    
   if (!profile?.current_org_id) throw new Error("No organization found");
   return { orgId: profile.current_org_id, userId: user.id };
 }

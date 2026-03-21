@@ -27,7 +27,7 @@ export async function generateMonthlyPayroll(monthYear: string) {
     .from("hr_settings")
     .select("*")
     .eq("organization_id", orgId)
-    .single();
+    .maybeSingle();
 
   const enablePF = settings?.enable_pf_deduction ?? false;
   const enableESI = settings?.enable_esi_deduction ?? false;

@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/ERP/login");
 
-  const { data: profile } = await supabase.from("profiles").select("current_org_id, full_name").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id, full_name").eq("id", user.id).maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
   const orgId = profile.current_org_id;

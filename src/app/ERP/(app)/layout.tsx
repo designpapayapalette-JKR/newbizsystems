@@ -15,7 +15,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .from("profiles")
     .select("*, org:organizations(*)")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
+
+  if (!profile) {
+    // If no profile exists, they might need onboarding or just a refresh
+    return redirect("/ERP/onboarding");
+  }
 
   const orgId = (profile as any)?.current_org_id;
   const orgName = (profile as any)?.org?.name ?? "My Business";
@@ -30,7 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .select("role")
       .eq("organization_id", orgId)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
     userRole = (memberRow?.role as Role) ?? "member";
 
     const { data: empRow } = await supabase
