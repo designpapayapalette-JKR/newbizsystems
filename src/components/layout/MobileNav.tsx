@@ -6,20 +6,27 @@ import { cn } from "@/lib/utils";
 import type { Role } from "@/types";
 
 const allTabs = [
-  { href: "/ERP/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["owner","admin","member"] },
-  { href: "/ERP/leads",     label: "Leads",      icon: Users,           roles: ["owner","admin","member"] },
-  { href: "/ERP/reminders", label: "Reminders",  icon: Bell,            roles: ["owner","admin","member"] },
-  { href: "/ERP/tasks",     label: "Tasks",      icon: CheckSquare,     roles: ["owner","admin","member"] },
-  { href: "/ERP/tickets",   label: "Tickets",    icon: Headphones,      roles: ["owner","admin","member"] },
-  { href: "/ERP/messages",  label: "Messages",   icon: MessageSquare,   roles: ["owner","admin","member"] },
-  { href: "/ERP/payments",  label: "Payments",   icon: CreditCard,      roles: ["owner","admin"] },
-  { href: "/ERP/invoices",  label: "Invoices",   icon: FileText,        roles: ["owner","admin"] },
-  { href: "/ERP/hr",        label: "HR & Payroll",icon: Briefcase,      roles: ["owner","admin"] },
+  { href: "/ERP/dashboard", label: "Dashboard",   icon: LayoutDashboard, roles: ["owner","admin","member"] },
+  { href: "/ERP/leads",     label: "Leads",       icon: Users,           roles: ["owner","admin","member"], departments: ["Sales"] },
+  { href: "/ERP/reminders", label: "Reminders",   icon: Bell,            roles: ["owner","admin","member"] },
+  { href: "/ERP/tasks",     label: "Tasks",       icon: CheckSquare,     roles: ["owner","admin","member"] },
+  { href: "/ERP/tickets",   label: "Tickets",     icon: Headphones,      roles: ["owner","admin","member"], departments: ["Support"] },
+  { href: "/ERP/messages",  label: "Messages",    icon: MessageSquare,   roles: ["owner","admin","member"] },
+  { href: "/ERP/payments",  label: "Payments",    icon: CreditCard,      roles: ["owner","admin", "member"], departments: ["Finance"] },
+  { href: "/ERP/invoices",  label: "Invoices",    icon: FileText,        roles: ["owner","admin", "member"], departments: ["Finance"] },
+  { href: "/ERP/hr",        label: "HR & Payroll",icon: Briefcase,       roles: ["owner","admin", "member"], departments: ["HR"] },
 ];
 
-export function MobileNav({ userRole }: { userRole: Role }) {
+export function MobileNav({ userRole, userDepartment }: { userRole: Role, userDepartment: string | null }) {
   const pathname = usePathname();
-  const tabs = allTabs.filter((t) => t.roles.includes(userRole));
+  const tabs = allTabs.filter((t) => {
+    if (!t.roles.includes(userRole)) return false;
+    // If Admin or Owner, they see everything
+    if (userRole === "admin" || userRole === "owner") return true;
+    // If the tab has a department restriction, the member must match it
+    if (t.departments && (!userDepartment || !t.departments.includes(userDepartment))) return false;
+    return true;
+  });
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t z-40 flex md:hidden safe-area-pb overflow-x-auto scrollbar-hide snap-x">

@@ -1,6 +1,7 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { inviteTeamMember } from "./team";
 
 export async function getEmployees() {
   const supabase = await createClient();
@@ -49,12 +50,24 @@ export async function createEmployee(data: {
     }
   }
 
-  const { error } = await supabase.from("hr_employees").insert(insertData);
+  const { error, data: newEmpRecord } = await supabase.from("hr_employees").insert(insertData).select().single();
 
   if (error) {
     console.error("Employee Creation Error:", error);
     throw new Error(error.message);
   }
+
+  // Auto-invite if email is provided
+  if (data.email) {
+    const role = data.department === "Admin" ? "admin" : "member";
+    try {
+      await inviteTeamMember(data.email, role);
+    } catch (inviteErr) {
+      console.error("Failed to auto-invite employee:", inviteErr);
+      // We don't throw here to avoid failing the whole employee creation if invite fails (e.g., already invited)
+    }
+  }
+
   revalidatePath("/ERP/hr");
   revalidatePath("/ERP/hr/employees");
 }

@@ -30,8 +30,8 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
   );
 
   function handleCreate() {
-    if (!newEmp.first_name || !newEmp.last_name) {
-      toast.error("First Name and Last Name are required");
+    if (!newEmp.first_name || !newEmp.last_name || !newEmp.department) {
+      toast.error("First Name, Last Name, and Department are required");
       return;
     }
     startTransition(async () => {
@@ -111,8 +111,20 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
         <Input value={data.phone} onChange={e => setData({...data, phone: e.target.value})} placeholder="+91 9876543210" />
       </div>
       <div className="space-y-1.5">
-        <label className="text-xs font-medium">Department</label>
-        <Input value={data.department} onChange={e => setData({...data, department: e.target.value})} placeholder="Sales" />
+        <label className="text-xs font-medium">Department *</label>
+        <select 
+          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          value={data.department} 
+          onChange={e => setData({...data, department: e.target.value})}
+          required
+        >
+          <option value="" disabled>Select Department</option>
+          <option value="Sales">Sales</option>
+          <option value="Support">Support</option>
+          <option value="Finance">Finance</option>
+          <option value="HR">HR</option>
+          <option value="Admin">Admin</option>
+        </select>
       </div>
       <div className="space-y-1.5">
         <label className="text-xs font-medium">Designation</label>
@@ -237,7 +249,7 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
           <FormFields data={newEmp} setData={setNewEmp} />
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setIsNewOpen(false)}>Cancel</Button>
-            <Button onClick={handleCreate} disabled={isPending || !newEmp.first_name || !newEmp.last_name}>
+            <Button onClick={handleCreate} disabled={isPending || !newEmp.first_name || !newEmp.last_name || !newEmp.department}>
               {isPending ? "Saving..." : "Save Employee"}
             </Button>
           </DialogFooter>
@@ -251,7 +263,7 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
           <FormFields data={editEmp} setData={setEditEmp} />
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setEditingId(null)}>Cancel</Button>
-            <Button onClick={handleUpdate} disabled={isPending || !editEmp.first_name || !editEmp.last_name}>
+            <Button onClick={handleUpdate} disabled={isPending || !editEmp.first_name || !editEmp.last_name || !editEmp.department}>
               {isPending ? "Updating..." : "Update Employee"}
             </Button>
           </DialogFooter>

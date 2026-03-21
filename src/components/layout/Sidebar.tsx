@@ -18,14 +18,14 @@ const navGroups = [
     label: "Sales & CRM",
     items: [
       { href: "/ERP/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["owner","admin","member"] },
-      { href: "/ERP/leads",     label: "Leads",     icon: Users,           roles: ["owner","admin","member"] },
+      { href: "/ERP/leads",     label: "Leads",     icon: Users,           roles: ["owner","admin","member"], departments: ["Sales"] },
       { href: "/ERP/tasks",     label: "Tasks",     icon: CheckSquare,     roles: ["owner","admin","member"] },
     ],
   },
   {
     label: "Operations",
     items: [
-      { href: "/ERP/tickets",   label: "Helpdesk",  icon: Headphones,      roles: ["owner","admin","member"] },
+      { href: "/ERP/tickets",   label: "Helpdesk",  icon: Headphones,      roles: ["owner","admin","member"], departments: ["Support"] },
       { href: "/ERP/messages",  label: "Messages",  icon: MessageSquare,   roles: ["owner","admin","member"] },
       { href: "/ERP/reminders", label: "Reminders", icon: Bell,            roles: ["owner","admin","member"] },
     ],
@@ -33,15 +33,15 @@ const navGroups = [
   {
     label: "Finance",
     items: [
-      { href: "/ERP/invoices",  label: "Invoices",  icon: FileText,        roles: ["owner","admin"] },
-      { href: "/ERP/payments",  label: "Payments",  icon: CreditCard,      roles: ["owner","admin"] },
-      { href: "/ERP/reports",   label: "Reports",   icon: BarChart2,       roles: ["owner","admin"] },
+      { href: "/ERP/invoices",  label: "Invoices",  icon: FileText,        roles: ["owner","admin", "member"], departments: ["Finance"] },
+      { href: "/ERP/payments",  label: "Payments",  icon: CreditCard,      roles: ["owner","admin", "member"], departments: ["Finance"] },
+      { href: "/ERP/reports",   label: "Reports",   icon: BarChart2,       roles: ["owner","admin", "member"], departments: ["Finance"] },
     ],
   },
   {
     label: "HR & Payroll",
     items: [
-      { href: "/ERP/hr",        label: "HR & Payroll", icon: Briefcase,    roles: ["owner","admin"] },
+      { href: "/ERP/hr",        label: "HR Directory", icon: Briefcase,    roles: ["owner","admin", "member"], departments: ["HR"] },
       { href: "/ERP/hr/time-clock", label: "Time Clock", icon: Clock,      roles: ["owner","admin","member"] },
     ],
   },
@@ -52,10 +52,11 @@ interface SidebarProps {
   userFullName: string | null;
   userAvatarUrl: string | null;
   userRole: Role;
+  userDepartment: string | null;
   isSuperAdmin?: boolean;
 }
 
-export function Sidebar({ orgName, userFullName, userAvatarUrl, userRole, isSuperAdmin }: SidebarProps) {
+export function Sidebar({ orgName, userFullName, userAvatarUrl, userRole, userDepartment, isSuperAdmin }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -75,7 +76,13 @@ export function Sidebar({ orgName, userFullName, userAvatarUrl, userRole, isSupe
       {/* Grouped Nav */}
       <nav className="flex-1 py-3 px-2 overflow-y-auto space-y-4">
         {navGroups.map(group => {
-          const visibleItems = group.items.filter(item => item.roles.includes(userRole));
+          const visibleItems = group.items.filter(item => {
+            if (!item.roles.includes(userRole)) return false;
+            if (userRole === "admin" || userRole === "owner") return true; // Admins see everything allowed for them
+            // Dynamic check for members
+            if ((item as any).departments && (!userDepartment || !(item as any).departments.includes(userDepartment))) return false;
+            return true;
+          });
           if (visibleItems.length === 0) return null;
           return (
             <div key={group.label}>
@@ -152,7 +159,9 @@ export function Sidebar({ orgName, userFullName, userAvatarUrl, userRole, isSupe
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{userFullName ?? "User"}</p>
-            <p className="text-xs text-muted-foreground capitalize">{userRole}</p>
+            <p className="text-xs text-muted-foreground capitalize">
+              {userRole === "member" ? (userDepartment || "Member") : userRole}
+            </p>
           </div>
           <button onClick={handleLogout} className="text-gray-400 hover:text-red-500 transition-colors" title="Sign out">
             <LogOut className="h-4 w-4" />

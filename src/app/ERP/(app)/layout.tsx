@@ -21,8 +21,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const orgName = (profile as any)?.org?.name ?? "My Business";
   const isSuperAdmin = (profile as any)?.is_super_admin === true;
 
-  // Fetch user's role in the current org
+  // Fetch user's role in the current org and their HR department
   let userRole: Role = "member";
+  let userDepartment: string | null = null;
   if (orgId) {
     const { data: memberRow } = await supabase
       .from("organization_members")
@@ -31,6 +32,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .eq("user_id", user.id)
       .single();
     userRole = (memberRow?.role as Role) ?? "member";
+
+    const { data: empRow } = await supabase
+      .from("hr_employees")
+      .select("department")
+      .eq("organization_id", orgId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    userDepartment = empRow?.department ?? null;
   }
 
   return (
@@ -42,6 +51,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           userFullName={profile?.full_name ?? null}
           userAvatarUrl={profile?.avatar_url ?? null}
           userRole={userRole}
+          userDepartment={userDepartment}
           isSuperAdmin={isSuperAdmin}
         />
       </div>
@@ -54,7 +64,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* Mobile Bottom Nav */}
-      <MobileNav userRole={userRole} />
+      <MobileNav userRole={userRole} userDepartment={userDepartment} />
 
       {/* Notification permission prompt + in-tab reminder poller */}
       <NotificationProvider />
