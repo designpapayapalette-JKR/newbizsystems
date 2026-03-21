@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Users, Bell, CreditCard, FileText,
   Settings, LogOut, Briefcase, CheckSquare, Headphones,
-  BarChart2, MessageSquare, Shield, ChevronRight, Clock
+  BarChart2, MessageSquare, Shield, ChevronRight, Clock, IndianRupee
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -42,6 +42,7 @@ const navGroups = [
     label: "HR & Payroll",
     items: [
       { href: "/ERP/hr",        label: "HR Directory", icon: Briefcase,    roles: ["owner","admin", "member"], departments: ["HR"] },
+      { href: "/ERP/hr/payroll", label: "Payroll",       icon: IndianRupee,  roles: ["owner","admin"],           departments: ["HR"] },
       { href: "/ERP/hr/time-clock", label: "Time Clock", icon: Clock,      roles: ["owner","admin","member"] },
     ],
   },

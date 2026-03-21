@@ -4,6 +4,7 @@ import { updateHrSettings } from "@/actions/hr_settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Save, Clock, AlertCircle } from "lucide-react";
@@ -23,6 +24,10 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
     lunch_break_start_time: initialData?.lunch_break_start_time || "13:00:00",
     lunch_break_end_time: initialData?.lunch_break_end_time || "14:00:00",
     total_working_hours: initialData?.total_working_hours || 9.00,
+    enable_pf_deduction: initialData?.enable_pf_deduction ?? false,
+    enable_esi_deduction: initialData?.enable_esi_deduction ?? false,
+    enable_tds_deduction: initialData?.enable_tds_deduction ?? false,
+    enable_pt_deduction: initialData?.enable_pt_deduction ?? false,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +98,39 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
               <Label htmlFor="total_working_hours">Required Total Working Hours (Per Day)</Label>
               <Input type="number" step="0.5" name="total_working_hours" value={formData.total_working_hours} onChange={handleChange} required />
               <p className="text-xs text-muted-foreground">Used to calculate shortfalls in payroll and attendance.</p>
+            </div>
+          </div>
+          <div className="border-t pt-4">
+            <h3 className="text-sm font-medium mb-3 text-muted-foreground">Statutory Deductions (Payroll)</h3>
+            <div className="space-y-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enable PF Deduction</Label>
+                  <p className="text-[10px] text-muted-foreground">Automatically deduct 12% Basic Pay for Provident Fund</p>
+                </div>
+                <Switch checked={formData.enable_pf_deduction} onCheckedChange={(c) => setFormData(p => ({...p, enable_pf_deduction: c}))} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enable ESI Deduction</Label>
+                  <p className="text-[10px] text-muted-foreground">Automatically deduct 0.75% Gross Pay for ESI (if Gross &le; ₹21k)</p>
+                </div>
+                <Switch checked={formData.enable_esi_deduction} onCheckedChange={(c) => setFormData(p => ({...p, enable_esi_deduction: c}))} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enable PT Deduction</Label>
+                  <p className="text-[10px] text-muted-foreground">Automatically deduct Standard Professional Tax (₹200)</p>
+                </div>
+                <Switch checked={formData.enable_pt_deduction} onCheckedChange={(c) => setFormData(p => ({...p, enable_pt_deduction: c}))} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enable TDS Deduction Engine</Label>
+                  <p className="text-[10px] text-muted-foreground">Allow the engine to generate standard TDS deductions</p>
+                </div>
+                <Switch checked={formData.enable_tds_deduction} onCheckedChange={(c) => setFormData(p => ({...p, enable_tds_deduction: c}))} />
+              </div>
             </div>
           </div>
 
