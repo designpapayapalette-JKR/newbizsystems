@@ -15,7 +15,7 @@ export default async function InvoicePreviewPage({ params }: { params: Promise<{
     .from("invoices")
     .select("id, invoice_number, org:organizations(invoice_template)")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   if (!invoice) notFound();
 

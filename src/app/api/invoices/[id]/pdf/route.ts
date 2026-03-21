@@ -635,7 +635,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     .from("invoices")
     .select(`*, lead:leads(id, name, company, email, phone, gstin, pan, state, state_code), line_items:invoice_line_items(*), org:organizations(*)`)
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   if (error || !invoice) {
     return new NextResponse("Not found", { status: 404 });

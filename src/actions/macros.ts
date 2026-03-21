@@ -6,8 +6,8 @@ async function getOrgAndUser() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
-  if (!profile?.current_org_id) throw new Error("No org");
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
+  if (!profile?.current_org_id) throw new Error("No organization assigned to this profile");
   return { supabase, user, orgId: profile.current_org_id };
 }
 
@@ -47,7 +47,7 @@ export async function createMacro(title: string, content_template: string) {
       content_template,
     })
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   revalidatePath("/ERP/tickets/[id]", "page"); 

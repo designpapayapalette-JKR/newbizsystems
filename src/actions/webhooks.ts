@@ -6,8 +6,9 @@ async function getOrg() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
-  return { supabase, user, orgId: profile!.current_org_id! };
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
+  if (!profile?.current_org_id) throw new Error("No organization assigned to this profile");
+  return { supabase, user, orgId: profile.current_org_id };
 }
 
 export async function getWebhooks() {

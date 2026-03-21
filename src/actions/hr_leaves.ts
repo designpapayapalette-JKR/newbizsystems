@@ -6,8 +6,8 @@ async function getOrgId() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
-  if (!profile?.current_org_id) throw new Error("No organization selected");
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
+  if (!profile?.current_org_id) throw new Error("No organization assigned to this profile");
   return { supabase, user, orgId: profile.current_org_id };
 }
 
@@ -43,7 +43,8 @@ export async function updateLeaveStatus(leaveId: string, status: "approved" | "r
   
   // If approving, deduct from balance
   if (status === "approved") {
-    const { data: leave } = await supabase.from("hr_leaves").select("*").eq("id", leaveId).single();
+    const { data: leave } = await supabase.from("hr_leaves").select("*").eq("id", leaveId).maybeSingle();
+    if (!leave) throw new Error("Leave request not found");
     if (leave) {
       const start = new Date(leave.start_date);
       const end = new Date(leave.end_date);

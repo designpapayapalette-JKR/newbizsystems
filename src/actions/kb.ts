@@ -6,8 +6,8 @@ async function getOrgAndUser() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
-  if (!profile?.current_org_id) throw new Error("No org");
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
+  if (!profile?.current_org_id) throw new Error("No organization assigned to this profile");
   return { supabase, user, orgId: profile.current_org_id };
 }
 
@@ -48,7 +48,7 @@ export async function getPublicKbArticles(orgId: string, category?: string) {
 
 export async function getPublicKbBySlug(slug: string, category?: string) {
   const supabase = await createClient();
-  const { data: org } = await supabase.from("organizations").select("id, name").eq("slug", slug).single();
+  const { data: org } = await supabase.from("organizations").select("id, name").eq("slug", slug).maybeSingle();
   if (!org) return { articles: [], orgName: "Help Center" };
 
   let query = supabase.from("kb_articles").select("*").eq("organization_id", org.id).eq("is_published", true).order("updated_at", { ascending: false });

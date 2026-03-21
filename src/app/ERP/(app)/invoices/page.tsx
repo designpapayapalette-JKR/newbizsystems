@@ -15,7 +15,7 @@ export default async function InvoicesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/ERP/login");
 
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
   // Only admin/owner can access invoices
@@ -24,7 +24,7 @@ export default async function InvoicesPage() {
     .select("role")
     .eq("organization_id", profile.current_org_id)
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
   if (!memberRow || memberRow.role === "member") redirect("/ERP/dashboard");
 
   const invoices = await getInvoices(profile.current_org_id);

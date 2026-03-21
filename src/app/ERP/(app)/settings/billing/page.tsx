@@ -12,7 +12,7 @@ export default async function BillingPage() {
     .from("profiles")
     .select("current_org_id")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
@@ -24,7 +24,7 @@ export default async function BillingPage() {
     .select("role")
     .eq("organization_id", orgId)
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (!member || member.role === "member") {
     return (

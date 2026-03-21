@@ -23,7 +23,7 @@ export async function createPayment(data: PaymentFormData) {
     .from("payments")
     .insert({ ...data, organization_id: orgId, created_by: userId, status: "pending", currency: data.currency ?? "INR" })
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   revalidatePath("/ERP/payments");
@@ -38,7 +38,7 @@ export async function updatePayment(id: string, data: Partial<PaymentFormData>) 
     .update({ ...data })
     .eq("id", id)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   revalidatePath("/ERP/payments");
@@ -50,7 +50,7 @@ export async function markPaymentPaid(id: string) {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
-  const { data: payment } = await supabase.from("payments").update({ status: "paid", paid_at: now }).eq("id", id).select().single();
+  const { data: payment } = await supabase.from("payments").update({ status: "paid", paid_at: now }).eq("id", id).select().maybeSingle();
 
   // Check if linked invoice is fully paid
   if (payment?.invoice_id) {
@@ -60,7 +60,7 @@ export async function markPaymentPaid(id: string) {
       .eq("invoice_id", payment.invoice_id)
       .eq("status", "paid");
 
-    const { data: invoice } = await supabase.from("invoices").select("total").eq("id", payment.invoice_id).single();
+    const { data: invoice } = await supabase.from("invoices").select("total").eq("id", payment.invoice_id).maybeSingle();
 
     if (invoice && allPayments) {
       const paid = allPayments.reduce((sum, p) => sum + p.amount, 0);

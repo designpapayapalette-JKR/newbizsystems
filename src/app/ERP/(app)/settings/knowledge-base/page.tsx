@@ -14,11 +14,11 @@ export default async function KnowledgeBaseSettingsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/ERP/login");
 
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
   // Get org slug for the public link
-  const { data: org } = await supabase.from("organizations").select("slug").eq("id", profile.current_org_id).single();
+  const { data: org } = await supabase.from("organizations").select("slug").eq("id", profile?.current_org_id).maybeSingle();
 
   const articles = await getKbArticles().catch(() => []);
 

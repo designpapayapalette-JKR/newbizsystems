@@ -134,7 +134,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       .from("hr_payroll")
       .select("*, employee:employee_id(*), org:organization_id(name)")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
     if (error || !record) return new NextResponse("Not Found", { status: 404 });
 

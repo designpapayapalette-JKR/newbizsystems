@@ -80,7 +80,7 @@ export async function createTicket(data: {
     assigned_to: data.assigned_to,
     sla_due_at,
     created_by: user.id,
-  }).select().single();
+  }).select().maybeSingle();
   if (error) throw error;
   revalidatePath("/ERP/tickets");
   return ticket;
@@ -96,13 +96,31 @@ export async function updateTicket(id: string, data: { title?: string; descripti
     .update(update)
     .eq("id", id)
     .select("ticket_number, title")
-    .single();
+    .maybeSingle();
 
-  if (error) throw error;
+  if (error || !ticket) throw error || new Error("Ticket not found");
+
+  const { orgId, user: authUser } = await getOrgAndUser();
+  const userId = authUser.id;
+
+  // Add audit log / notification
+  if (update.status || update.priority) {
+    await supabase.from("audit_logs").insert({
+      organization_id: orgId,
+      user_id: userId,
+      action: "ticket_update",
+      entity_type: "ticket",
+      entity_id: id,
+      details: { 
+        ticket_number: ticket.ticket_number,
+        title: ticket.title,
+        changes: update 
+      }
+    });
+  }
 
   // Create notification if assigned
   if (data.assigned_to) {
-    const { orgId } = await getOrgAndUser();
     await supabase.from("reminders").insert({
       organization_id: orgId,
       user_id: data.assigned_to,

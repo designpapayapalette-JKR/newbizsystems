@@ -23,11 +23,11 @@ export default async function LeadInvoicesPage({ params }: { params: Promise<{ i
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/ERP/login");
 
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
   const [leadResult, invoicesResult] = await Promise.all([
-    supabase.from("leads").select("id, name").eq("id", id).single(),
+    supabase.from("leads").select("id, name").eq("id", id).maybeSingle(),
     supabase
       .from("invoices")
       .select("*, line_items:invoice_line_items(*)")

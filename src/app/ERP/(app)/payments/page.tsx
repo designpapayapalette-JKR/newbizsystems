@@ -12,7 +12,7 @@ export default async function PaymentsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/ERP/login");
 
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
   // Only admin/owner can access payments
@@ -21,7 +21,7 @@ export default async function PaymentsPage() {
     .select("role")
     .eq("organization_id", profile.current_org_id)
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
   if (!memberRow || memberRow.role === "member") redirect("/ERP/dashboard");
 
   const [payments, leadsResult, invoicesResult] = await Promise.all([

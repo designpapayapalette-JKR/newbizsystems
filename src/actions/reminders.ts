@@ -21,7 +21,7 @@ export async function createReminder(data: ReminderFormData) {
 
 export async function completeReminder(id: string) {
   const supabase = await createClient();
-  const { data } = await supabase.from("reminders").select("lead_id").eq("id", id).single();
+  const { data } = await supabase.from("reminders").select("lead_id").eq("id", id).maybeSingle();
   await supabase.from("reminders").update({ is_completed: true, completed_at: new Date().toISOString() }).eq("id", id);
   revalidatePath("/ERP/reminders");
   revalidatePath("/ERP/dashboard");
@@ -30,7 +30,7 @@ export async function completeReminder(id: string) {
 
 export async function deleteReminder(id: string) {
   const supabase = await createClient();
-  const { data } = await supabase.from("reminders").select("lead_id").eq("id", id).single();
+  const { data } = await supabase.from("reminders").select("lead_id").eq("id", id).maybeSingle();
   await supabase.from("reminders").delete().eq("id", id);
   revalidatePath("/ERP/reminders");
   if (data?.lead_id) revalidatePath(`/ERP/leads/${data.lead_id}`);

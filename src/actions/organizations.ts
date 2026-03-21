@@ -29,7 +29,7 @@ export async function createOrganization(name: string, currency = "INR") {
     .from("organizations")
     .insert({ name, slug, currency })
     .select()
-    .single();
+    .maybeSingle();
 
   if (orgError) throw orgError;
 

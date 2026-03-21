@@ -9,7 +9,7 @@ async function requireSuperAdmin() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { data: profile } = await supabase.from("profiles").select("is_super_admin").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("is_super_admin").eq("id", user.id).maybeSingle();
   if (!profile?.is_super_admin) throw new Error("Super admin access required");
   return user;
 }
@@ -48,7 +48,7 @@ export async function getPlatformTicketDetails(ticketId: string) {
     .from("platform_tickets")
     .select("*")
     .eq("id", ticketId)
-    .single();
+    .maybeSingle();
     
   if (ticketError) throw ticketError;
   
@@ -68,7 +68,7 @@ export async function getPlatformTicketDetails(ticketId: string) {
   const msgsWithProfiles = (messages || []).map(m => ({ ...m, profile: profileMap[m.sender_id] }));
   
   // Fetch org manually
-  const { data: org } = await supabase.from("organizations").select("name").eq("id", ticket.organization_id).single();
+  const { data: org } = await supabase.from("organizations").select("name").eq("id", ticket.organization_id).maybeSingle();
   ticket.organization = org;
   
   return { ticket, messages: msgsWithProfiles };

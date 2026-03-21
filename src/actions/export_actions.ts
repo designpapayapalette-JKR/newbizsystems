@@ -5,8 +5,8 @@ async function getOrgId() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
-  if (!profile?.current_org_id) throw new Error("No organization selected");
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
+  if (!profile?.current_org_id) throw new Error("No organization assigned to this profile");
   return { supabase, orgId: profile.current_org_id };
 }
 

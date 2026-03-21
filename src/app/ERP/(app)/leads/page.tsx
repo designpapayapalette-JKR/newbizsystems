@@ -23,7 +23,7 @@ export default async function LeadsPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/ERP/login");
 
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
   const orgId = profile.current_org_id;
@@ -38,7 +38,7 @@ export default async function LeadsPage({
       sort: sp.sort,
     }),
     supabase.from("pipeline_stages").select("*").eq("organization_id", orgId).order("position"),
-    supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", user.id).single(),
+    supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", user.id).maybeSingle(),
   ]);
 
   const userRole = memberRow.data?.role ?? "member";

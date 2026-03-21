@@ -16,17 +16,18 @@ export default async function CustomersPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/ERP/login");
 
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
-  const { data: customers, error } = await supabase
+  let { data: customers, error } = await supabase
     .from("customers")
     .select("*")
     .eq("organization_id", profile.current_org_id)
     .neq("status", "archived")
     .order("name");
 
-  if (error) throw error;
+  if (error) console.error("Error fetching customers:", error);
+  if (!customers) customers = [];
 
   return (
     <div className="flex flex-col h-full">

@@ -21,11 +21,11 @@ export async function getAuditLogs(limit = 50) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
   const { data: logs } = await supabase
     .from("audit_logs")
     .select("*")
-    .eq("organization_id", profile!.current_org_id!)
+    .eq("organization_id", profile?.current_org_id || "")
     .order("created_at", { ascending: false })
     .limit(limit);
   if (!logs?.length) return [];

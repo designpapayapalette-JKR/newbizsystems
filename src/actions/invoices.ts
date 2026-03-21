@@ -39,9 +39,9 @@ export async function createInvoice(data: InvoiceFormData) {
   const { orgId, userId } = await getOrgId();
 
   // Fetch org and lead for GST validation
-  const { data: org } = await supabase.from("organizations").select("*").eq("id", orgId).single();
+  const { data: org } = await supabase.from("organizations").select("*").eq("id", orgId).maybeSingle();
   const { data: lead } = data.lead_id 
-    ? await supabase.from("leads").select("*").eq("id", data.lead_id).single()
+    ? await supabase.from("leads").select("*").eq("id", data.lead_id).maybeSingle()
     : { data: null };
 
   const currency = data.currency ?? "INR";
@@ -120,7 +120,7 @@ export async function createInvoice(data: InvoiceFormData) {
       currency,
     })
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
 
@@ -159,12 +159,12 @@ export async function updateInvoice(id: string, data: Partial<InvoiceFormData>) 
 
   if (data.line_items !== undefined || data.tax_percent !== undefined || data.discount !== undefined) {
     // Re-fetch current invoice to get existing values for calculation if not provided
-    const { data: current } = await supabase.from("invoices").select("*").eq("id", id).single();
+    const { data: current } = await supabase.from("invoices").select("*").eq("id", id).maybeSingle();
     
     // Fetch org and lead for recalculation
-    const { data: org } = await supabase.from("organizations").select("*").eq("id", orgId).single();
+    const { data: org } = await supabase.from("organizations").select("*").eq("id", orgId).maybeSingle();
     const lId = data.lead_id ?? current.lead_id;
-    const { data: lead } = lId ? await supabase.from("leads").select("*").eq("id", lId).single() : { data: null };
+    const { data: lead } = lId ? await supabase.from("leads").select("*").eq("id", lId).maybeSingle() : { data: null };
 
     const items = data.line_items ?? [];
     const subtotal = data.line_items ? items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0) : current.subtotal;
@@ -282,7 +282,7 @@ export async function getInvoiceById(id: string) {
     .from("invoices")
     .select(`*, lead:leads(id, name, company, email, phone), line_items:invoice_line_items(*), org:organizations(*)`)
     .eq("id", id)
-    .single();
+    .maybeSingle();
   if (error) throw error;
   return data;
 }

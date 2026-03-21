@@ -63,7 +63,7 @@ export async function createLead(data: LeadFormData) {
     .from("leads")
     .insert({ ...leadData, organization_id: orgId, created_by: userId })
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
 
@@ -96,7 +96,7 @@ export async function updateLead(id: string, data: Partial<LeadFormData>) {
 export async function deleteLead(id: string) {
   const supabase = await createClient();
   const { orgId, userId } = await getOrgId();
-  const { data: member } = await supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", userId).single();
+  const { data: member } = await supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", userId).maybeSingle();
   const role = member?.role ?? "member";
   if (role !== "admin" && role !== "owner") throw new Error("Only admins can delete leads");
 
@@ -107,7 +107,7 @@ export async function deleteLead(id: string) {
 export async function restoreLead(id: string) {
   const supabase = await createClient();
   const { orgId, userId } = await getOrgId();
-  const { data: member } = await supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", userId).single();
+  const { data: member } = await supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", userId).maybeSingle();
   const role = member?.role ?? "member";
   if (role !== "admin" && role !== "owner") throw new Error("Only admins can restore leads");
 
@@ -182,7 +182,7 @@ export async function getLeadById(id: string) {
     .from("leads")
     .select(`*, stage:pipeline_stages(*), tags:lead_tags(tag)`)
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   const lead = { ...data, tags: data.tags?.map((t: { tag: string }) => t.tag) ?? [] };
@@ -203,7 +203,7 @@ export async function getLeadById(id: string) {
 export async function assignLead(leadId: string, userId: string | null) {
   const supabase = await createClient();
   const { orgId, userId: currentUserId } = await getOrgId();
-  const { data: member } = await supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", currentUserId).single();
+  const { data: member } = await supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", currentUserId).maybeSingle();
   const role = member?.role ?? "member";
   if (role !== "admin" && role !== "owner") throw new Error("Only admins can assign leads");
 
@@ -212,20 +212,21 @@ export async function assignLead(leadId: string, userId: string | null) {
     .update({ assigned_to: userId })
     .eq("id", leadId)
     .select("name")
-    .single();
+    .maybeSingle();
 
-  if (error) throw error;
-
-  // Create internal notification/reminder for the assignee
-  if (userId) {
+  if (error || !lead) throw error || new Error("Lead not found");
+  
+  // Create notification for new assignee
+  // The orgId is already available from the getOrgId() call above.
+  if (userId) { // Only create reminder if a user is actually assigned
     await supabase.from("reminders").insert({
       organization_id: orgId,
       user_id: userId,
-      lead_id: leadId,
-      title: `New Lead Assigned: ${lead.name}`,
-      description: `You have been assigned as the owner for lead "${lead.name}".`,
+      lead_id: leadId, // Keep lead_id for context
+      title: `Lead Assigned: ${lead.name}`,
+      description: `You have been assigned to lead ${lead.name}`,
       due_at: new Date().toISOString(),
-      priority: "high"
+      priority: "medium"
     });
   }
 
@@ -242,7 +243,7 @@ export async function convertToCustomer(leadId: string) {
     .from("leads")
     .select("*")
     .eq("id", leadId)
-    .single();
+    .maybeSingle();
     
   if (fetchErr || !lead) throw new Error("Lead not found");
   
@@ -265,7 +266,7 @@ export async function convertToCustomer(leadId: string) {
       status: "active"
     })
     .select()
-    .single();
+    .maybeSingle();
     
   if (insertErr) throw insertErr;
   

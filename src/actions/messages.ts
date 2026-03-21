@@ -23,9 +23,9 @@ export async function ensureTeamChannel(orgId: string): Promise<string> {
     .from("message_channels")
     .insert({ organization_id: orgId, type: "group", name: "Team" })
     .select("id")
-    .single();
+    .maybeSingle();
 
-  if (error) throw error;
+  if (error || !channel) throw error || new Error("Failed to create channel");
   return channel.id;
 }
 
@@ -85,9 +85,9 @@ async function _ensureDMChannel(
     .from("message_channels")
     .insert({ organization_id: orgId, type: "direct" })
     .select("id")
-    .single();
+    .maybeSingle();
 
-  if (error) throw error;
+  if (error || !channel) throw error || new Error("Failed to create direct channel");
 
   await supabase.from("channel_members").insert([
     { channel_id: channel.id, user_id: userId },

@@ -11,7 +11,7 @@ export async function getHrSettings() {
     .from("hr_settings")
     .select("*")
     .eq("organization_id", orgId)
-    .single();
+    .maybeSingle();
 
   if (error && error.code !== "PGRST116") throw error; // ignore no rows
   return data;

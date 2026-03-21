@@ -19,7 +19,7 @@ export default async function MessagesPage() {
     .from("profiles")
     .select("current_org_id, full_name")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
   const orgId = profile.current_org_id;

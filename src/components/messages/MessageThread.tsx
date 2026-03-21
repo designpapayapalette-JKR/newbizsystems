@@ -76,7 +76,7 @@ export function MessageThread({ channel, initialMessages, currentUserId, current
             .from("profiles")
             .select("id, full_name, avatar_url")
             .eq("id", newMsg.sender_id)
-            .single();
+            .maybeSingle();
 
           setMessages((prev) => {
             // Avoid duplicates (optimistic update already added it)

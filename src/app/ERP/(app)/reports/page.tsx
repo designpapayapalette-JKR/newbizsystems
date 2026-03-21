@@ -22,7 +22,7 @@ export default async function ReportsPage() {
     .from("profiles")
     .select("current_org_id")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
   const orgId = profile.current_org_id;

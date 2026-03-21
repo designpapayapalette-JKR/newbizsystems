@@ -36,8 +36,8 @@ export async function createEmployee(data: {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
-  if (!profile?.current_org_id) throw new Error("No organization selected");
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
+  if (!profile?.current_org_id) throw new Error("No organization assigned to this profile");
 
   const insertData: Record<string, any> = {
     organization_id: profile.current_org_id,
@@ -50,7 +50,7 @@ export async function createEmployee(data: {
     }
   }
 
-  const { error, data: newEmpRecord } = await supabase.from("hr_employees").insert(insertData).select().single();
+  const { error, data: newEmpRecord } = await supabase.from("hr_employees").insert(insertData).select().maybeSingle();
 
   if (error) {
     console.error("Employee Creation Error:", error);

@@ -15,7 +15,7 @@ export default async function EditInvoicePage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/ERP/login");
 
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
   const resolvedParams = await params;
@@ -36,7 +36,7 @@ export default async function EditInvoicePage({
     .from("organizations")
     .select("id, name, gstin, state, state_code, currency")
     .eq("id", profile.current_org_id)
-    .single();
+    .maybeSingle();
 
   return (
     <div className="flex flex-col h-full">

@@ -23,7 +23,7 @@ export default function ProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setEmail(user.email ?? "");
-      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       if (data) {
         setFullName(data.full_name ?? "");
         setPhone(data.phone ?? "");

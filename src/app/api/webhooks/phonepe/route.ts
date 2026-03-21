@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     })
     .eq("id", merchantOrderId)
     .select("invoice_id, amount")
-    .single();
+    .maybeSingle();
 
   // If paid and linked to invoice, update invoice status
   if (isSuccess && payment?.invoice_id) {
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       .from("invoices")
       .select("total")
       .eq("id", payment.invoice_id)
-      .single();
+      .maybeSingle();
 
     if (invoice && allPaidPayments) {
       const totalPaid = allPaidPayments.reduce((s: number, p: any) => s + p.amount, 0);

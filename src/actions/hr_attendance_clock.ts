@@ -33,7 +33,7 @@ export async function processClockAction({
     .select("*")
     .eq("employee_id", employeeId)
     .eq("date", dateStr)
-    .single();
+    .maybeSingle();
 
   const updateData: any = {};
   
@@ -60,7 +60,7 @@ export async function processClockAction({
     updateData.employee_id = employeeId;
     
     // organization_id
-    const { data: emp } = await supabase.from("hr_employees").select("organization_id").eq("id", employeeId).single();
+    const { data: emp } = await supabase.from("hr_employees").select("organization_id").eq("id", employeeId).maybeSingle();
     if (emp) updateData.organization_id = emp.organization_id;
 
     if (!attendance) {
