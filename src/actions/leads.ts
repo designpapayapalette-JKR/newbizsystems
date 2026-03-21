@@ -89,12 +89,22 @@ export async function updateLead(id: string, data: Partial<LeadFormData>) {
 
 export async function deleteLead(id: string) {
   const supabase = await createClient();
+  const { orgId, userId } = await getOrgId();
+  const { data: member } = await supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", userId).single();
+  const role = member?.role ?? "member";
+  if (role !== "admin" && role !== "owner") throw new Error("Only admins can delete leads");
+
   await supabase.from("leads").update({ is_archived: true }).eq("id", id);
   revalidatePath("/ERP/leads");
 }
 
 export async function restoreLead(id: string) {
   const supabase = await createClient();
+  const { orgId, userId } = await getOrgId();
+  const { data: member } = await supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", userId).single();
+  const role = member?.role ?? "member";
+  if (role !== "admin" && role !== "owner") throw new Error("Only admins can restore leads");
+
   await supabase.from("leads").update({ is_archived: false }).eq("id", id);
   revalidatePath("/ERP/leads");
 }
@@ -186,6 +196,11 @@ export async function getLeadById(id: string) {
 
 export async function assignLead(leadId: string, userId: string | null) {
   const supabase = await createClient();
+  const { orgId, userId: currentUserId } = await getOrgId();
+  const { data: member } = await supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", currentUserId).single();
+  const role = member?.role ?? "member";
+  if (role !== "admin" && role !== "owner") throw new Error("Only admins can assign leads");
+
   const { error } = await supabase
     .from("leads")
     .update({ assigned_to: userId })

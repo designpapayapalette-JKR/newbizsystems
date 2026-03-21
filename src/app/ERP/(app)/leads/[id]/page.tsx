@@ -36,15 +36,19 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
-  const [lead, activities, reminders, stagesResult, teamMembers] = await Promise.all([
+  const [lead, activities, reminders, stagesResult, teamMembers, memberRow] = await Promise.all([
     getLeadById(id).catch(() => null),
     getActivities(id),
     getLeadReminders(id),
     supabase.from("pipeline_stages").select("*").eq("organization_id", profile.current_org_id).order("position"),
     getTeamMembers(profile.current_org_id),
+    supabase.from("organization_members").select("role").eq("organization_id", profile.current_org_id).eq("user_id", user.id).single(),
   ]);
 
   if (!lead) notFound();
+
+  const userRole = memberRow.data?.role ?? "member";
+  const isAdmin = userRole === "admin" || userRole === "owner";
 
   const stages = stagesResult.data ?? [];
   const priorityStyle = lead.priority ? PRIORITY_STYLES[lead.priority] : null;
@@ -57,11 +61,13 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           <div className="flex gap-2">
             <AddReminderDialog leadId={lead.id} leadName={lead.name} />
             <LogActivityDialog leadId={lead.id} />
-            <AssignLeadDialog
-              leadId={lead.id}
-              currentAssigneeId={(lead as any).assigned_to ?? null}
-              members={teamMembers as any[]}
-            />
+            {isAdmin && (
+              <AssignLeadDialog
+                leadId={lead.id}
+                currentAssigneeId={(lead as any).assigned_to ?? null}
+                members={teamMembers as any[]}
+              />
+            )}
             <LeadFormDialog
               stages={stages}
               lead={lead as any}
@@ -72,7 +78,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
                 </Button>
               }
             />
-            <LeadDeleteButton leadId={lead.id} />
+            {isAdmin && <LeadDeleteButton leadId={lead.id} />}
           </div>
         }
       />

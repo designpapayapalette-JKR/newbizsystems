@@ -29,7 +29,7 @@ export default async function LeadsPage({
   const orgId = profile.current_org_id;
   const sp = await searchParams;
 
-  const [leads, stagesResult] = await Promise.all([
+  const [leads, stagesResult, memberRow] = await Promise.all([
     getLeads(orgId, {
       search: sp.search,
       stage_id: sp.stage_id,
@@ -38,7 +38,11 @@ export default async function LeadsPage({
       sort: sp.sort,
     }),
     supabase.from("pipeline_stages").select("*").eq("organization_id", orgId).order("position"),
+    supabase.from("organization_members").select("role").eq("organization_id", orgId).eq("user_id", user.id).single(),
   ]);
+
+  const userRole = memberRow.data?.role ?? "member";
+  const isAdmin = userRole === "admin" || userRole === "owner";
 
   const stages = stagesResult.data ?? [];
   const view = sp.view === "list" ? "list" : "kanban";
@@ -52,8 +56,12 @@ export default async function LeadsPage({
             <Button asChild variant="ghost" size="sm" className="gap-1 text-muted-foreground">
               <Link href="/ERP/leads/archived"><Archive className="h-4 w-4" /> Archived</Link>
             </Button>
-            <LeadCsvImport stages={stages} />
-            <LeadCsvExport leads={leads} />
+            {isAdmin && (
+              <>
+                <LeadCsvImport stages={stages} />
+                <LeadCsvExport leads={leads} />
+              </>
+            )}
             <ViewToggle currentView={view} />
             <LeadFormDialog stages={stages} />
           </div>
