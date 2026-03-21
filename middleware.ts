@@ -72,7 +72,7 @@ export async function middleware(request: NextRequest) {
       .from("profiles")
       .select("current_org_id")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!profile?.current_org_id) {
       return NextResponse.redirect(new URL("/ERP/onboarding", request.url));
