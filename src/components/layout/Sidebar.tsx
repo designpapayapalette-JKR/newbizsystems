@@ -28,7 +28,6 @@ const navGroups = [
       { href: "/ERP/tickets",   label: "Helpdesk",  icon: Headphones,      roles: ["owner","admin","member"] },
       { href: "/ERP/messages",  label: "Messages",  icon: MessageSquare,   roles: ["owner","admin","member"] },
       { href: "/ERP/reminders", label: "Reminders", icon: Bell,            roles: ["owner","admin","member"] },
-      { href: "/ERP/hr/time-clock", label: "Time Clock", icon: Clock,      roles: ["owner","admin","member"] },
     ],
   },
   {
@@ -43,6 +42,7 @@ const navGroups = [
     label: "HR & Payroll",
     items: [
       { href: "/ERP/hr",        label: "HR & Payroll", icon: Briefcase,    roles: ["owner","admin"] },
+      { href: "/ERP/hr/time-clock", label: "Time Clock", icon: Clock,      roles: ["owner","admin","member"] },
     ],
   },
 ];
