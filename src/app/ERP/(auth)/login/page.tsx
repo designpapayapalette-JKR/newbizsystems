@@ -43,7 +43,8 @@ function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="h-11 bg-white border-gray-200 focus:border-zinc-900 focus:ring-zinc-900 transition-colors"
+          disabled={loading}
+          className="h-11 bg-white border-gray-200 focus:border-zinc-900 focus:ring-zinc-900 transition-colors disabled:opacity-70"
         />
       </div>
       <div className="space-y-2">
@@ -61,12 +62,19 @@ function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="current-password"
-          className="h-11 bg-white border-gray-200 focus:border-zinc-900 focus:ring-zinc-900 transition-colors"
+          disabled={loading}
+          className="h-11 bg-white border-gray-200 focus:border-zinc-900 focus:ring-zinc-900 transition-colors disabled:opacity-70"
         />
       </div>
       <Button type="submit" className="w-full h-11 text-base font-medium mt-2 bg-zinc-900 hover:bg-zinc-800 text-white transition-colors" disabled={loading}>
-        {loading && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
-        Sign in
+        {loading ? (
+          <>
+            <Loader2 className="animate-spin mr-2 h-4 w-4" />
+            Signing in...
+          </>
+        ) : (
+          "Sign in"
+        )}
       </Button>
     </form>
   );
