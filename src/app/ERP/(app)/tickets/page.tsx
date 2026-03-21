@@ -52,7 +52,7 @@ export default async function TicketsPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/ERP/login");
 
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
   if (!profile?.current_org_id) redirect("/ERP/onboarding");
 
   const sp = await searchParams;
@@ -81,7 +81,7 @@ export default async function TicketsPage({
             size="sm"
             className="h-7 px-3 text-xs"
           >
-            <Link href={value === "all" ? "/ERP/tickets" : `/tickets?status=${value}`}>
+            <Link href={value === "all" ? "/ERP/tickets" : `/ERP/tickets?status=${value}`}>
               {label}
             </Link>
           </Button>
@@ -98,25 +98,26 @@ export default async function TicketsPage({
         ) : (
           <div className="space-y-2">
             {tickets.map((ticket: any) => (
-              <Link
+              <div
                 key={ticket.id}
-                href={`/ERP/tickets/${ticket.id}`}
-                className="block bg-white border rounded-lg px-4 py-3 hover:shadow-sm transition-shadow"
+                className="group relative bg-white border rounded-lg px-4 py-3 hover:shadow-sm transition-shadow"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
+                  <Link href={`/ERP/tickets/${ticket.id}`} className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs text-muted-foreground font-mono shrink-0">
                         {ticket.ticket_number}
                       </span>
-                      <span className="font-medium text-sm truncate">{ticket.title}</span>
+                      <span className="font-medium text-sm truncate group-hover:text-primary transition-colors">
+                        {ticket.title}
+                      </span>
                     </div>
                     {ticket.lead?.name && (
                       <p className="text-xs text-muted-foreground mt-0.5">
                         Lead: {ticket.lead.name}
                       </p>
                     )}
-                  </div>
+                  </Link>
                   <div className="flex items-center gap-3 shrink-0">
                     <div className="flex -space-x-1">
                       {ticket.assignee ? (
@@ -147,21 +148,21 @@ export default async function TicketsPage({
                       variant="outline"
                       className={`text-[10px] px-1.5 py-0 capitalize ${PRIORITY_BADGE[ticket.priority] ?? ""}`}
                     >
-                      {ticket.priority}
+                      {ticket.priority || 'medium'}
                     </Badge>
                     <Badge
                       variant="outline"
                       className={`text-[10px] px-1.5 py-0 capitalize ${STATUS_BADGE[ticket.status] ?? ""}`}
                     >
-                      {ticket.status.replace("_", " ")}
+                      {(ticket.status || 'open').replace("_", " ")}
                     </Badge>
-                    <div className="flex items-center gap-1 border-l pl-3 ml-1" onClick={(e) => e.preventDefault()}>
+                    <div className="flex items-center gap-1 border-l pl-3 ml-1">
                       <TicketFormDialog members={members} ticket={ticket} />
                       <DeleteTicketButton id={ticket.id} ticketNumber={ticket.ticket_number} />
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}

@@ -6,7 +6,7 @@ async function getOrgAndUser() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
-  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("current_org_id").eq("id", user.id).maybeSingle();
   if (!profile?.current_org_id) throw new Error("No org");
   return { supabase, user, orgId: profile.current_org_id };
 }
@@ -164,7 +164,7 @@ export async function getTicketById(id: string) {
     .from("tickets")
     .select("*, lead:leads(id, name), comments:ticket_comments(*)")
     .eq("id", id)
-    .single();
+    .maybeSingle();
   if (error) throw error;
   if (!data) return null;
 
