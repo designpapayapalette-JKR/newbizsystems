@@ -15,7 +15,8 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
   const [isNewOpen, setIsNewOpen] = useState(false);
   const [newEmp, setNewEmp] = useState({
     first_name: "", last_name: "", email: "", phone: "", employee_id: "", designation: "", department: "",
-    base_salary_monthly: "", pan_number: "", uan_number: "", esic_number: ""
+    base_salary_monthly: "", pan_number: "", uan_number: "", esic_number: "",
+    daily_working_hours: "9"
   });
 
   // Edit Mode
@@ -37,11 +38,12 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
       try {
         await createEmployee({
           ...newEmp,
-          base_salary_monthly: newEmp.base_salary_monthly ? Number(newEmp.base_salary_monthly) : 0
+          base_salary_monthly: newEmp.base_salary_monthly ? Number(newEmp.base_salary_monthly) : 0,
+          daily_working_hours: newEmp.daily_working_hours ? Number(newEmp.daily_working_hours) : 9
         });
         toast.success("Employee added successfully");
         setIsNewOpen(false);
-        setNewEmp({ first_name: "", last_name: "", email: "", phone: "", employee_id: "", designation: "", department: "", base_salary_monthly: "", pan_number: "", uan_number: "", esic_number: "" });
+        setNewEmp({ first_name: "", last_name: "", email: "", phone: "", employee_id: "", designation: "", department: "", base_salary_monthly: "", pan_number: "", uan_number: "", esic_number: "", daily_working_hours: "9" });
       } catch (e: any) {
         toast.error(e.message || "Failed to add employee");
       }
@@ -50,7 +52,11 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
 
   function openEdit(emp: any) {
     setEditingId(emp.id);
-    setEditEmp({ ...emp, base_salary_monthly: emp.base_salary_monthly || "" });
+    setEditEmp({ 
+      ...emp, 
+      base_salary_monthly: emp.base_salary_monthly || "",
+      daily_working_hours: emp.daily_working_hours || "9"
+    });
   }
 
   function handleUpdate() {
@@ -59,7 +65,8 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
       try {
         await updateEmployee(editingId, {
           ...editEmp,
-          base_salary_monthly: editEmp.base_salary_monthly ? Number(editEmp.base_salary_monthly) : 0
+          base_salary_monthly: editEmp.base_salary_monthly ? Number(editEmp.base_salary_monthly) : 0,
+          daily_working_hours: editEmp.daily_working_hours ? Number(editEmp.daily_working_hours) : 9
         });
         toast.success("Employee updated successfully");
         setEditingId(null);
@@ -115,8 +122,15 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
         <label className="text-xs font-medium">Base Salary (₹/month)</label>
         <Input type="number" value={data.base_salary_monthly} onChange={e => setData({...data, base_salary_monthly: e.target.value})} placeholder="40000" />
       </div>
-      <div className="space-y-1.5 sm:col-span-2 pt-2 pb-1">
-        <h4 className="text-sm font-semibold text-gray-700 border-b pb-1">Compliance & Banking</h4>
+      <div className="space-y-1.5 pt-2 pb-1 sm:col-span-2 border-b">
+        <h4 className="text-sm font-semibold text-gray-700 pb-1">Scheduling</h4>
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium">Daily Working Hours</label>
+        <Input type="number" step="0.5" value={data.daily_working_hours || "9"} onChange={e => setData({...data, daily_working_hours: e.target.value})} placeholder="9" />
+      </div>
+      <div className="space-y-1.5 sm:col-span-2 pt-2 pb-1 border-b">
+        <h4 className="text-sm font-semibold text-gray-700 pb-1">Compliance & Banking</h4>
       </div>
       <div className="space-y-1.5">
         <label className="text-xs font-medium">PAN Number</label>

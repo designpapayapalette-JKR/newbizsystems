@@ -28,6 +28,8 @@ export async function createEmployee(data: {
   esic_number?: string;
   bank_account?: string;
   ifsc_code?: string;
+  daily_working_hours?: number;
+  working_days?: number[];
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
