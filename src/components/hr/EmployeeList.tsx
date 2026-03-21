@@ -16,7 +16,7 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
   const [newEmp, setNewEmp] = useState({
     first_name: "", last_name: "", email: "", phone: "", employee_id: "", designation: "", department: "",
     base_salary_monthly: "", pan_number: "", uan_number: "", esic_number: "",
-    daily_working_hours: "9"
+    daily_working_hours: "9", employee_type: "Full Time"
   });
 
   // Edit Mode
@@ -43,7 +43,7 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
         });
         toast.success("Employee added successfully");
         setIsNewOpen(false);
-        setNewEmp({ first_name: "", last_name: "", email: "", phone: "", employee_id: "", designation: "", department: "", base_salary_monthly: "", pan_number: "", uan_number: "", esic_number: "", daily_working_hours: "9" });
+        setNewEmp({ first_name: "", last_name: "", email: "", phone: "", employee_id: "", designation: "", department: "", base_salary_monthly: "", pan_number: "", uan_number: "", esic_number: "", daily_working_hours: "9", employee_type: "Full Time" });
       } catch (e: any) {
         toast.error(e.message || "Failed to add employee");
       }
@@ -129,6 +129,19 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
       <div className="space-y-1.5">
         <label className="text-xs font-medium">Designation</label>
         <Input value={data.designation} onChange={e => setData({...data, designation: e.target.value})} placeholder="Manager" />
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium">Employment Type</label>
+        <select 
+          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          value={data.employee_type || "Full Time"} 
+          onChange={e => setData({...data, employee_type: e.target.value})}
+        >
+          <option value="Full Time">Full Time</option>
+          <option value="Intern">Intern</option>
+          <option value="Contract">Contract</option>
+          <option value="Part Time">Part Time</option>
+        </select>
       </div>
       <div className="space-y-1.5">
         <label className="text-xs font-medium">Base Salary (₹/month)</label>
