@@ -232,10 +232,10 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
 
       {/* CREATE DIALOG */}
       <Dialog open={isNewOpen} onOpenChange={setIsNewOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-xl w-[95vw] max-h-[85vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader><DialogTitle>Add New Employee</DialogTitle></DialogHeader>
           <FormFields data={newEmp} setData={setNewEmp} />
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setIsNewOpen(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={isPending || !newEmp.first_name || !newEmp.last_name}>
               {isPending ? "Saving..." : "Save Employee"}
@@ -246,10 +246,10 @@ export function EmployeeList({ initialEmployees }: { initialEmployees: any[] }) 
 
       {/* EDIT DIALOG */}
       <Dialog open={!!editingId} onOpenChange={(val) => !val && setEditingId(null)}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-xl w-[95vw] max-h-[85vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader><DialogTitle>Edit Employee Records</DialogTitle></DialogHeader>
           <FormFields data={editEmp} setData={setEditEmp} />
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setEditingId(null)}>Cancel</Button>
             <Button onClick={handleUpdate} disabled={isPending || !editEmp.first_name || !editEmp.last_name}>
               {isPending ? "Updating..." : "Update Employee"}

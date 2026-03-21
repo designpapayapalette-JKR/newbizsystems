@@ -22,7 +22,7 @@ export function MobileNav({ userRole }: { userRole: Role }) {
   const tabs = allTabs.filter((t) => t.roles.includes(userRole));
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t z-40 flex md:hidden safe-area-pb">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t z-40 flex md:hidden safe-area-pb overflow-x-auto scrollbar-hide snap-x">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const active = pathname === tab.href || pathname.startsWith(tab.href + "/");
@@ -31,8 +31,8 @@ export function MobileNav({ userRole }: { userRole: Role }) {
             key={tab.href}
             href={tab.href}
             className={cn(
-              "flex-1 flex flex-col items-center justify-center py-2 text-xs gap-1 transition-colors",
-              active ? "text-primary" : "text-gray-400 hover:text-gray-600"
+              "flex-none min-w-[72px] flex flex-col items-center justify-center py-2 text-xs gap-1 transition-colors snap-center",
+              active ? "text-primary bg-primary/5" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
             )}
           >
             <Icon className={cn("h-5 w-5", active && "text-primary")} />
