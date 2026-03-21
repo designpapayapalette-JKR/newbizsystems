@@ -35,6 +35,7 @@ const navGroups = [
     items: [
       { href: "/ERP/invoices",  label: "Invoices",  icon: FileText,        roles: ["owner","admin", "member"], departments: ["Finance"] },
       { href: "/ERP/payments",  label: "Payments",  icon: CreditCard,      roles: ["owner","admin", "member"], departments: ["Finance"] },
+      { href: "/ERP/payments/expenses", label: "Expenses", icon: IndianRupee, roles: ["owner","admin", "member"], departments: ["Finance"] },
       { href: "/ERP/reports",   label: "Reports",   icon: BarChart2,       roles: ["owner","admin", "member"], departments: ["Finance"] },
     ],
   },

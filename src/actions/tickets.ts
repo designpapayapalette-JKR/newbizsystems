@@ -26,7 +26,50 @@ export async function createTicket(data: {
 }) {
   const { supabase, user, orgId } = await getOrgAndUser();
   const ticket_number = await nextTicketNumber(supabase, orgId);
-  const sla_due_at = data.sla_hours ? new Date(Date.now() + data.sla_hours * 3600000).toISOString() : null;
+  
+  // Business-Hours SLA Logic
+  let sla_due_at = null;
+  if (data.sla_hours) {
+    const { data: settings } = await supabase.from("hr_settings").select("work_start_time, work_end_time").eq("organization_id", orgId).maybeSingle();
+    const startStr = settings?.work_start_time || "09:30:00";
+    const endStr = settings?.work_end_time || "18:30:00";
+    const [startH, startM] = startStr.split(":").map(Number);
+    const [endH, endM] = endStr.split(":").map(Number);
+    
+    let current = new Date();
+    let remainingSla = data.sla_hours;
+    
+    while (remainingSla > 0) {
+      const dow = current.getDay();
+      if (dow === 0 || dow === 6) { // Skip weekends
+        current.setDate(current.getDate() + 1);
+        current.setHours(startH, startM, 0, 0);
+        continue;
+      }
+      
+      const tStart = new Date(current); tStart.setHours(startH, startM, 0, 0);
+      const tEnd = new Date(current); tEnd.setHours(endH, endM, 0, 0);
+      
+      if (current < tStart) current = tStart;
+      if (current >= tEnd) {
+        current.setDate(current.getDate() + 1);
+        current.setHours(startH, startM, 0, 0);
+        continue;
+      }
+      
+      const hrsLeft = (tEnd.getTime() - current.getTime()) / 3600000;
+      if (remainingSla <= hrsLeft) {
+        current = new Date(current.getTime() + remainingSla * 3600000);
+        remainingSla = 0;
+      } else {
+        remainingSla -= hrsLeft;
+        current.setDate(current.getDate() + 1);
+        current.setHours(startH, startM, 0, 0);
+      }
+    }
+    sla_due_at = current.toISOString();
+  }
+
   const { data: ticket, error } = await supabase.from("tickets").insert({
     organization_id: orgId,
     ticket_number,
@@ -47,8 +90,29 @@ export async function updateTicket(id: string, data: { title?: string; descripti
   const { supabase } = await getOrgAndUser();
   const update: Record<string, unknown> = { ...data };
   if (data.status === "resolved" || data.status === "closed") update.resolved_at = new Date().toISOString();
-  const { error } = await supabase.from("tickets").update(update).eq("id", id);
+  
+  const { data: ticket, error } = await supabase
+    .from("tickets")
+    .update(update)
+    .eq("id", id)
+    .select("ticket_number, title")
+    .single();
+
   if (error) throw error;
+
+  // Create notification if assigned
+  if (data.assigned_to) {
+    const { orgId } = await getOrgAndUser();
+    await supabase.from("reminders").insert({
+      organization_id: orgId,
+      user_id: data.assigned_to,
+      title: `New Ticket Assigned: ${ticket.ticket_number}`,
+      description: `Support Ticket #${ticket.ticket_number} (${ticket.title}) has been assigned to you.`,
+      due_at: new Date().toISOString(),
+      priority: "high"
+    });
+  }
+
   revalidatePath("/ERP/tickets");
   revalidatePath(`/ERP/tickets/${id}`);
 }

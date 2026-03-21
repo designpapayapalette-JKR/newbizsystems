@@ -20,17 +20,21 @@ export default async function DashboardPage() {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
-  const [leadsResult, stagesResult, remindersResult, paymentsResult, activitiesResult] = await Promise.all([
+  const [leadsResult, stagesResult, remindersResult, paymentsResult, activitiesResult, expensesResult, payrollResult] = await Promise.all([
     supabase.from("leads").select("id, name, stage_id, deal_value, created_at").eq("organization_id", orgId).eq("is_archived", false),
     supabase.from("pipeline_stages").select("*").eq("organization_id", orgId).order("position"),
     supabase.from("reminders").select("*").eq("organization_id", orgId).eq("is_completed", false).order("due_at").limit(5),
     supabase.from("payments").select("amount, status, due_date, paid_at").eq("organization_id", orgId),
     supabase.from("activities").select("*").eq("organization_id", orgId).order("occurred_at", { ascending: false }).limit(8),
+    supabase.from("expenses").select("amount, date").eq("organization_id", orgId),
+    supabase.from("hr_payroll").select("net_payable, status, month_year").eq("organization_id", orgId).eq("status", "paid"),
   ]);
 
   const leads = leadsResult.data ?? [];
   const stages = stagesResult.data ?? [];
   const payments = paymentsResult.data ?? [];
+  const expenses = expensesResult.data ?? [];
+  const payrolls = payrollResult.data ?? [];
   const rawActivities = activitiesResult.data ?? [];
   const rawReminders = remindersResult.data ?? [];
 
@@ -55,7 +59,12 @@ export default async function DashboardPage() {
 
   const overduePayments = payments.filter((p) => p.status === "overdue" || (p.status === "pending" && p.due_date && p.due_date < now.toISOString().slice(0, 10))).length;
   const dueThisMonth = payments.filter((p) => p.status === "pending" && p.due_date && p.due_date >= startOfMonth.slice(0, 10) && p.due_date <= endOfMonth.slice(0, 10)).reduce((sum, p) => sum + p.amount, 0);
+  
   const wonThisMonth = payments.filter((p) => p.status === "paid" && p.paid_at && p.paid_at >= startOfMonth && p.paid_at <= endOfMonth).reduce((sum, p) => sum + p.amount, 0);
+  const expensesThisMonth = expenses.filter((e) => e.date >= startOfMonth.slice(0, 10) && e.date <= endOfMonth.slice(0, 10)).reduce((sum, e) => sum + Number(e.amount), 0);
+  const payrollThisMonth = payrolls.filter((p) => p.month_year === now.toISOString().slice(0, 7)).reduce((sum, p) => sum + Number(p.net_payable), 0);
+  
+  const netProfit = wonThisMonth - expensesThisMonth - payrollThisMonth;
 
   const leadsByStage = stages.map((stage) => ({
     stage: stage.name,
@@ -81,8 +90,8 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <WinRateCard label="Win Rate" value={`${winRate}%`} sub={`${wonLeads.length} won / ${closedLeads} closed`} color="text-green-600" bg="bg-green-50" />
           <WinRateCard label="Avg Deal Size" value={avgDealSize > 0 ? `₹${Math.round(avgDealSize).toLocaleString("en-IN")}` : "—"} sub="of won deals" color="text-blue-600" bg="bg-blue-50" />
-          <WinRateCard label="Won This Month" value={wonThisMonth > 0 ? `₹${Math.round(wonThisMonth).toLocaleString("en-IN")}` : "₹0"} sub="in payments received" color="text-indigo-600" bg="bg-indigo-50" />
-          <WinRateCard label="Lost Leads" value={lostLeads.length.toString()} sub={`${closedLeads > 0 ? Math.round((lostLeads.length / closedLeads) * 100) : 0}% loss rate`} color="text-red-500" bg="bg-red-50" />
+          <WinRateCard label="Gross Revenue" value={wonThisMonth > 0 ? `₹${Math.round(wonThisMonth).toLocaleString("en-IN")}` : "₹0"} sub="this month" color="text-indigo-600" bg="bg-indigo-50" />
+          <WinRateCard label="Net Profit" value={`₹${Math.round(netProfit).toLocaleString("en-IN")}`} sub="after taxes & expenses" color={netProfit >= 0 ? "text-emerald-700" : "text-red-700"} bg={netProfit >= 0 ? "bg-emerald-50" : "bg-red-50"} />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PipelineChart data={leadsByStage} />

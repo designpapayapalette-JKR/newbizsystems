@@ -28,6 +28,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
     enable_esi_deduction: initialData?.enable_esi_deduction ?? false,
     enable_tds_deduction: initialData?.enable_tds_deduction ?? false,
     enable_pt_deduction: initialData?.enable_pt_deduction ?? false,
+    pf_capping_limit: initialData?.pf_capping_limit || 15000,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,6 +111,13 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                 </div>
                 <Switch checked={formData.enable_pf_deduction} onCheckedChange={(c) => setFormData(p => ({...p, enable_pf_deduction: c}))} />
               </div>
+              {formData.enable_pf_deduction && (
+                <div className="pl-6 space-y-1.5">
+                  <Label htmlFor="pf_capping_limit">PF Capping Limit (Monthly Basic)</Label>
+                  <Input type="number" name="pf_capping_limit" value={formData.pf_capping_limit} onChange={handleChange} />
+                  <p className="text-[10px] text-muted-foreground italic">Standard limit is ₹15,000. PF will be 12% of Basic or Capping Limit (whichever is lower).</p>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <div>
                   <Label>Enable ESI Deduction</Label>

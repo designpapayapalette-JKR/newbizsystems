@@ -36,12 +36,14 @@ export async function generateMonthlyPayroll(monthYear: string) {
   // 2. Fetch all active employees
   const { data: employees, error: empError } = await supabase
     .from("hr_employees")
-    .select("id, base_salary_monthly, status, working_days")
+    .select("id, base_salary_monthly, status, working_days, date_of_joining")
     .eq("organization_id", orgId)
     .eq("status", "active");
 
   if (empError) throw empError;
   if (!employees?.length) return { count: 0 };
+
+  const pfCappingLimit = Number(settings?.pf_capping_limit) || 15000;
 
   // Helper to count working days in a month
   const [year, monthNum] = monthYear.split("-").map(Number);
@@ -52,7 +54,22 @@ export async function generateMonthlyPayroll(monthYear: string) {
   for (const emp of employees) {
     const gross = Number(emp.base_salary_monthly) || 0;
     
-    // Calculate attendance-based deduction
+    // Mid-month joining proration
+    const joiningDate = emp.date_of_joining ? new Date(emp.date_of_joining) : null;
+    let expectedDaysInPeriod = 0;
+    const allowedWorkingDaysIndices = Array.isArray(emp.working_days) ? emp.working_days : [1,2,3,4,5];
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const currentDate = new Date(year, monthNum - 1, d);
+      
+      // Skip days before joining
+      if (joiningDate && currentDate < joiningDate) continue;
+      
+      if (allowedWorkingDaysIndices.includes(currentDate.getDay())) {
+        expectedDaysInPeriod++;
+      }
+    }
+
     // 1. Get attendance records for this month
     const { data: attendance } = await supabase
       .from("hr_attendance")
@@ -65,23 +82,34 @@ export async function generateMonthlyPayroll(monthYear: string) {
     const halfDays = attendance?.filter(a => a.status === "half_day").length || 0;
     const actualDays = presentDays + (halfDays * 0.5);
 
-    // Calculate expected working days (assuming simplified 30 days or based on emp.working_days)
-    // For simplicity, we use 26 days average or calculate based on working_days
-    const allowedWorkingDaysIndices = Array.isArray(emp.working_days) ? emp.working_days : [1,2,3,4,5];
-    let expectedDays = 0;
+    // Daily Rate
+    // Note: We use the full month expected days for the daily rate calculation to keep the daily rate consistent
+    let fullMonthExpectedDays = 0;
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, monthNum - 1, d);
       if (allowedWorkingDaysIndices.includes(date.getDay())) {
-        expectedDays++;
+        fullMonthExpectedDays++;
       }
     }
-
-    // Daily Rate
-    const dailyRate = gross / (expectedDays || 30);
-    const absentDays = Math.max(0, expectedDays - actualDays);
+    
+    const dailyRate = gross / (fullMonthExpectedDays || 30);
+    const absentDays = Math.max(0, expectedDaysInPeriod - actualDays);
     const absenceDeduction = absentDays * dailyRate;
 
-    const adjustedGross = Math.max(0, gross - absenceDeduction);
+    // Additionally, if they joined mid-month, we deduct the days before they joined
+    let preJoiningDeduction = 0;
+    if (joiningDate && joiningDate.getMonth() + 1 === monthNum && joiningDate.getFullYear() === year) {
+        let preJoiningWorkingDays = 0;
+        for (let d = 1; d < joiningDate.getDate(); d++) {
+             const dDate = new Date(year, monthNum - 1, d);
+             if (allowedWorkingDaysIndices.includes(dDate.getDay())) {
+                 preJoiningWorkingDays++;
+             }
+        }
+        preJoiningDeduction = preJoiningWorkingDays * dailyRate;
+    }
+
+    const adjustedGross = Math.max(0, gross - absenceDeduction - preJoiningDeduction);
 
     // Standard Output Component Formula (on adjusted gross)
     const basic = adjustedGross * 0.50;
@@ -89,7 +117,10 @@ export async function generateMonthlyPayroll(monthYear: string) {
     const specialAllowance = adjustedGross - (basic + hra); 
 
     // Compute statutory deductions based on Admin toggles
-    const pf = enablePF ? (basic * 0.12) : 0;
+    // PF Capping: 12% of MIN(Basic Salary, pf_capping_limit)
+    const pfSalaryBase = Math.min(basic, pfCappingLimit);
+    const pf = enablePF ? (pfSalaryBase * 0.12) : 0;
+    
     const esi = enableESI && (adjustedGross <= 21000) ? (adjustedGross * 0.0075) : 0;
     const pt = enablePT && (adjustedGross > 15000) ? 200 : 0;
     const tds = 0; 
@@ -103,7 +134,7 @@ export async function generateMonthlyPayroll(monthYear: string) {
       basic_salary: basic,
       hra: hra,
       special_allowance: specialAllowance,
-      gross_salary: gross, // Store original gross
+      gross_salary: gross, 
       pf_deduction: pf,
       esi_deduction: esi,
       pt_deduction: pt,

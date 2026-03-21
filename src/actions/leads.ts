@@ -207,11 +207,28 @@ export async function assignLead(leadId: string, userId: string | null) {
   const role = member?.role ?? "member";
   if (role !== "admin" && role !== "owner") throw new Error("Only admins can assign leads");
 
-  const { error } = await supabase
+  const { data: lead, error } = await supabase
     .from("leads")
     .update({ assigned_to: userId })
-    .eq("id", leadId);
+    .eq("id", leadId)
+    .select("name")
+    .single();
+
   if (error) throw error;
+
+  // Create internal notification/reminder for the assignee
+  if (userId) {
+    await supabase.from("reminders").insert({
+      organization_id: orgId,
+      user_id: userId,
+      lead_id: leadId,
+      title: `New Lead Assigned: ${lead.name}`,
+      description: `You have been assigned as the owner for lead "${lead.name}".`,
+      due_at: new Date().toISOString(),
+      priority: "high"
+    });
+  }
+
   revalidatePath(`/ERP/leads/${leadId}`);
   revalidatePath("/ERP/leads");
 }
