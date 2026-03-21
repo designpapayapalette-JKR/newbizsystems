@@ -168,7 +168,10 @@ export async function getLeads(orgId: string, filters?: {
   }
 
   const { data, error } = await query;
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching leads:", error);
+    return [];
+  }
 
   return data.map((lead) => ({
     ...lead,
@@ -184,7 +187,11 @@ export async function getLeadById(id: string) {
     .eq("id", id)
     .maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching lead by id:", error);
+    return null;
+  }
+  if (!data) return null;
   const lead = { ...data, tags: data.tags?.map((t: { tag: string }) => t.tag) ?? [] };
 
   // Fetch assignee profile if assigned

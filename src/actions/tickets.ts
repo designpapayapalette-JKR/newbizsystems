@@ -160,7 +160,7 @@ export async function getTickets(filters?: { status?: string; priority?: string;
   if (filters?.priority && filters.priority !== "all") q = q.eq("priority", filters.priority);
   if (filters?.assigned_to) q = q.eq("assigned_to", filters.assigned_to);
   const { data, error } = await q;
-  if (error) throw error;
+  if (error) console.error("Error fetching tickets:", error);
   if (!data?.length) return [];
 
   // Fetch assignee profiles manually
@@ -183,7 +183,7 @@ export async function getTicketById(id: string) {
     .select("*, lead:leads(id, name), comments:ticket_comments(*)")
     .eq("id", id)
     .maybeSingle();
-  if (error) throw error;
+  if (error) console.error("Error fetching ticket by id:", error);
   if (!data) return null;
 
   const commentUserIds = (data.comments ?? []).map((c: any) => c.user_id).filter(Boolean);
