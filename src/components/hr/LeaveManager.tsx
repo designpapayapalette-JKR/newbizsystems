@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
-import { createLeaveRequest, updateLeaveStatus, deleteLeave } from "@/actions/hr_leaves";
-import { Plus, Check, X, Trash2, CalendarOff, ChevronDown } from "lucide-react";
+import { createLeaveRequest, updateLeaveStatus, deleteLeave, updateLeaveRequest } from "@/actions/hr_leaves";
+import { Plus, Check, X, Trash2, CalendarOff, ChevronDown, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -25,24 +25,54 @@ function daysBetween(start: string, end: string) {
 export function LeaveManager({ leaves, employees }: { leaves: any[]; employees: any[] }) {
   const [isPending, startTransition] = useTransition();
   const [isNewOpen, setIsNewOpen] = useState(false);
+  const [editingLeave, setEditingLeave] = useState<any>(null);
   const [form, setForm] = useState({ employee_id: "", type: "sick", start_date: "", end_date: "", reason: "" });
   const [filter, setFilter] = useState("all");
 
   const filtered = filter === "all" ? leaves : leaves.filter(l => l.status === filter);
 
-  function handleCreate() {
+  function handleOpenNew() {
+    setEditingLeave(null);
+    setForm({ employee_id: "", type: "sick", start_date: "", end_date: "", reason: "" });
+    setIsNewOpen(true);
+  }
+
+  function handleOpenEdit(leave: any) {
+    setEditingLeave(leave);
+    setForm({
+      employee_id: leave.employee_id,
+      type: leave.type,
+      start_date: leave.start_date,
+      end_date: leave.end_date,
+      reason: leave.reason || ""
+    });
+    setIsNewOpen(true);
+  }
+
+  function handleSubmit() {
     if (!form.employee_id || !form.start_date || !form.end_date) {
       toast.error("Employee, start date, and end date are required");
       return;
     }
     startTransition(async () => {
       try {
-        await createLeaveRequest(form);
-        toast.success("Leave request created");
+        if (editingLeave) {
+          await updateLeaveRequest(editingLeave.id, {
+            type: form.type,
+            start_date: form.start_date,
+            end_date: form.end_date,
+            reason: form.reason
+          });
+          toast.success("Leave request updated");
+        } else {
+          await createLeaveRequest(form);
+          toast.success("Leave request created");
+        }
         setIsNewOpen(false);
+        setEditingLeave(null);
         setForm({ employee_id: "", type: "sick", start_date: "", end_date: "", reason: "" });
       } catch (e: any) {
-        toast.error(e.message || "Failed to create leave request");
+        toast.error(e.message || "Failed to process leave request");
       }
     });
   }
@@ -97,7 +127,7 @@ export function LeaveManager({ leaves, employees }: { leaves: any[]; employees: 
             </button>
           ))}
         </div>
-        <Button onClick={() => setIsNewOpen(true)}>
+        <Button onClick={handleOpenNew}>
           <Plus className="h-4 w-4 mr-2" /> Apply Leave
         </Button>
       </div>
@@ -131,15 +161,18 @@ export function LeaveManager({ leaves, employees }: { leaves: any[]; employees: 
                 </span>
                 {leave.status === "pending" && (
                   <>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:bg-green-50" onClick={() => handleStatus(leave.id, "approved")} disabled={isPending}>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-600 hover:bg-blue-50" onClick={() => handleOpenEdit(leave)} disabled={isPending} title="Edit">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:bg-green-50" onClick={() => handleStatus(leave.id, "approved")} disabled={isPending} title="Approve">
                       <Check className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => handleStatus(leave.id, "rejected")} disabled={isPending}>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => handleStatus(leave.id, "rejected")} disabled={isPending} title="Reject">
                       <X className="h-4 w-4" />
                     </Button>
                   </>
                 )}
-                <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-red-500" onClick={() => handleDelete(leave.id)} disabled={isPending}>
+                <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-red-500" onClick={() => handleDelete(leave.id)} disabled={isPending} title="Delete">
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -154,22 +187,24 @@ export function LeaveManager({ leaves, employees }: { leaves: any[]; employees: 
         )}
       </div>
 
-      {/* Create Dialog */}
+      {/* Create/Edit Dialog */}
       <Dialog open={isNewOpen} onOpenChange={setIsNewOpen}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Apply for Leave</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editingLeave ? "Edit Leave Request" : "Apply for Leave"}</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium">Employee *</label>
-              <Select value={form.employee_id} onValueChange={v => setForm(p => ({ ...p, employee_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select employee" /></SelectTrigger>
-                <SelectContent>
-                  {employees.map(e => (
-                    <SelectItem key={e.id} value={e.id}>{e.first_name} {e.last_name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!editingLeave && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium">Employee *</label>
+                <Select value={form.employee_id} onValueChange={v => setForm(p => ({ ...p, employee_id: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select employee" /></SelectTrigger>
+                  <SelectContent>
+                    {employees.map(e => (
+                      <SelectItem key={e.id} value={e.id}>{e.first_name} {e.last_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-1.5">
               <label className="text-xs font-medium">Leave Type *</label>
               <Select value={form.type} onValueChange={v => setForm(p => ({ ...p, type: v }))}>
@@ -204,8 +239,8 @@ export function LeaveManager({ leaves, employees }: { leaves: any[]; employees: 
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsNewOpen(false)}>Cancel</Button>
-            <Button onClick={handleCreate} disabled={isPending || !form.employee_id || !form.start_date || !form.end_date}>
-              {isPending ? "Submitting..." : "Submit Request"}
+            <Button onClick={handleSubmit} disabled={isPending || !form.employee_id || !form.start_date || !form.end_date}>
+              {isPending ? "Processing..." : (editingLeave ? "Update Request" : "Submit Request")}
             </Button>
           </DialogFooter>
         </DialogContent>

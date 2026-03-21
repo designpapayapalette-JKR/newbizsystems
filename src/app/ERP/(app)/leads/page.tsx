@@ -76,11 +76,11 @@ export default async function LeadsPage({
         />
       ) : view === "list" ? (
         <div className="flex-1 overflow-y-auto py-2">
-          <LeadListView leads={leads} />
+          <LeadListView leads={leads} stages={stages} isAdmin={isAdmin} />
         </div>
       ) : (
         <div className="flex-1 overflow-hidden pt-2">
-          <KanbanBoard stages={stages} leads={leads} />
+          <KanbanBoard stages={stages} leads={leads} isAdmin={isAdmin} />
         </div>
       )}
     </div>

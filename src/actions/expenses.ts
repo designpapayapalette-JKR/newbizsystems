@@ -39,6 +39,14 @@ export async function createExpense(data: {
   revalidatePath("/ERP/dashboard");
 }
 
+export async function updateExpense(id: string, data: Partial<{ category: string; amount: number; date: string; description: string }>) {
+  const { supabase } = await getOrgId();
+  const { error } = await supabase.from("expenses").update(data).eq("id", id);
+  if (error) throw error;
+  revalidatePath("/ERP/payments/expenses");
+  revalidatePath("/ERP/dashboard");
+}
+
 export async function deleteExpense(id: string) {
   const { supabase } = await getOrgId();
   const { error } = await supabase.from("expenses").delete().eq("id", id);

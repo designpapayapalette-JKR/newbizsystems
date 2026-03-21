@@ -7,9 +7,10 @@ interface TopBarProps {
   title: string;
   subtitle?: string;
   actions?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
-export function TopBar({ title, subtitle, actions }: TopBarProps) {
+export function TopBar({ title, subtitle, actions, children }: TopBarProps) {
   return (
     <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 md:px-8 py-3 md:py-5 border-b bg-background/80 backdrop-blur-md sticky top-0 z-30">
       <div>
@@ -18,6 +19,7 @@ export function TopBar({ title, subtitle, actions }: TopBarProps) {
       </div>
       <div className="flex items-center gap-2">
         {actions}
+        {children}
         <Link href="/ERP/reminders">
           <Button variant="ghost" size="icon">
             <Bell className="h-4 w-4" />

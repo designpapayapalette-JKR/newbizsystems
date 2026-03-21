@@ -8,6 +8,8 @@ import { CheckCircle2, Clock, Trash2, Link as LinkIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import { ReminderFormDialog } from "./ReminderFormDialog";
+
 interface ReminderListProps {
   pending: Reminder[];
   completed: Reminder[];
@@ -23,6 +25,7 @@ function ReminderItem({ reminder, showComplete = true }: { reminder: Reminder; s
   }
 
   async function handleDelete() {
+    if (!confirm("Delete this reminder?")) return;
     await deleteReminder(reminder.id);
     router.refresh();
   }
@@ -61,6 +64,9 @@ function ReminderItem({ reminder, showComplete = true }: { reminder: Reminder; s
           <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600 hover:text-green-700" onClick={handleComplete} title="Mark complete">
             <CheckCircle2 className="h-4 w-4" />
           </Button>
+        )}
+        {!reminder.is_completed && (
+          <ReminderFormDialog reminder={reminder} />
         )}
         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={handleDelete} title="Delete">
           <Trash2 className="h-3.5 w-3.5" />

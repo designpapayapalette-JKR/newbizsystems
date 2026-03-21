@@ -4,14 +4,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatRelative } from "@/lib/utils";
 import type { Lead } from "@/types";
-import { Phone, Mail, MessageCircle, Building2, Calendar } from "lucide-react";
+import { Phone, Mail, MessageCircle, Building2, Calendar, Pencil, Trash2 } from "lucide-react";
 import { encodeWhatsAppMessage } from "@/lib/utils";
+import { LeadFormDialog } from "./LeadFormDialog";
+import { LeadDeleteButton } from "./LeadDeleteButton";
 
 interface LeadListViewProps {
   leads: Lead[];
+  stages: any[];
+  isAdmin: boolean;
 }
 
-export function LeadListView({ leads }: LeadListViewProps) {
+export function LeadListView({ leads, stages, isAdmin }: LeadListViewProps) {
   if (leads.length === 0) return null;
 
   return (
@@ -47,28 +51,52 @@ export function LeadListView({ leads }: LeadListViewProps) {
             {lead.deal_value && (
               <span className="text-sm font-semibold text-green-700">{formatCurrency(lead.deal_value)}</span>
             )}
-            <div className="flex gap-1">
-              {lead.phone && (
-                <>
+            <div className="flex items-center gap-1">
+              <div className="flex gap-1 border-r pr-2 mr-2">
+                {lead.phone && (
+                  <>
+                    <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+                      <a href={`tel:${lead.phone}`} title="Call">
+                        <Phone className="h-3.5 w-3.5" />
+                      </a>
+                    </Button>
+                    <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+                      <a href={encodeWhatsAppMessage(lead.phone, `Hi ${lead.name}!`)} target="_blank" rel="noopener" title="WhatsApp">
+                        <MessageCircle className="h-3.5 w-3.5 text-green-600" />
+                      </a>
+                    </Button>
+                  </>
+                )}
+                {lead.email && (
                   <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-                    <a href={`tel:${lead.phone}`} title="Call">
-                      <Phone className="h-3.5 w-3.5" />
+                    <a href={`mailto:${lead.email}`} title="Email">
+                      <Mail className="h-3.5 w-3.5" />
                     </a>
                   </Button>
-                  <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-                    <a href={encodeWhatsAppMessage(lead.phone, `Hi ${lead.name}!`)} target="_blank" rel="noopener" title="WhatsApp">
-                      <MessageCircle className="h-3.5 w-3.5 text-green-600" />
-                    </a>
-                  </Button>
-                </>
-              )}
-              {lead.email && (
-                <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-                  <a href={`mailto:${lead.email}`} title="Email">
-                    <Mail className="h-3.5 w-3.5" />
-                  </a>
-                </Button>
-              )}
+                )}
+              </div>
+              
+              <div className="flex items-center gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                <LeadFormDialog 
+                  stages={stages} 
+                  lead={lead} 
+                  trigger={
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title="Edit Lead">
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                  } 
+                />
+                {isAdmin && (
+                  <LeadDeleteButton 
+                    leadId={lead.id} 
+                    trigger={
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-600" title="Delete/Archive Lead">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    }
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>

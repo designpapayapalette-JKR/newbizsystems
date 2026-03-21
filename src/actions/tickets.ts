@@ -117,6 +117,13 @@ export async function updateTicket(id: string, data: { title?: string; descripti
   revalidatePath(`/ERP/tickets/${id}`);
 }
 
+export async function deleteTicket(id: string) {
+  const { supabase } = await getOrgAndUser();
+  const { error } = await supabase.from("tickets").delete().eq("id", id);
+  if (error) throw error;
+  revalidatePath("/ERP/tickets");
+}
+
 export async function addTicketComment(ticketId: string, body: string, isInternal = false) {
   const { supabase, user } = await getOrgAndUser();
   const { error } = await supabase.from("ticket_comments").insert({ ticket_id: ticketId, user_id: user.id, body, is_internal: isInternal });

@@ -20,29 +20,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createTicket } from "@/actions/tickets";
+import { createTicket, updateTicket } from "@/actions/tickets";
 import { toast } from "sonner";
-import { Plus, Loader2, User } from "lucide-react";
+import { Plus, Loader2, User, Pencil } from "lucide-react";
 
 interface TicketFormDialogProps {
   members: any[];
+  ticket?: any;
 }
 
-export function TicketFormDialog({ members }: TicketFormDialogProps) {
+export function TicketFormDialog({ members, ticket }: TicketFormDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    priority: "medium",
-    lead_id: "",
-    sla_hours: "",
-    assigned_to: "",
+    title: ticket?.title || "",
+    description: ticket?.description || "",
+    priority: ticket?.priority || "medium",
+    lead_id: ticket?.lead_id || "",
+    sla_hours: ticket?.sla_hours || "",
+    assigned_to: ticket?.assigned_to || "",
   });
 
   function reset() {
-    setForm({ title: "", description: "", priority: "medium", lead_id: "", sla_hours: "", assigned_to: "" });
+    if (ticket) {
+      setForm({
+        title: ticket.title,
+        description: ticket.description || "",
+        priority: ticket.priority,
+        lead_id: ticket.lead_id || "",
+        sla_hours: ticket.sla_hours || "",
+        assigned_to: ticket.assigned_to || "",
+      });
+    } else {
+      setForm({ title: "", description: "", priority: "medium", lead_id: "", sla_hours: "", assigned_to: "" });
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -50,20 +62,30 @@ export function TicketFormDialog({ members }: TicketFormDialogProps) {
     if (!form.title.trim()) return;
     setLoading(true);
     try {
-      await createTicket({
-        title: form.title.trim(),
-        description: form.description.trim() || undefined,
-        priority: form.priority,
-        lead_id: form.lead_id.trim() || undefined,
-        sla_hours: form.sla_hours ? Number(form.sla_hours) : undefined,
-        assigned_to: form.assigned_to || undefined,
-      });
-      toast.success("Ticket created");
+      if (ticket) {
+        await updateTicket(ticket.id, {
+          title: form.title.trim(),
+          description: form.description.trim() || undefined,
+          priority: form.priority,
+          assigned_to: form.assigned_to === "unassigned" ? undefined : (form.assigned_to || undefined),
+        });
+        toast.success("Ticket updated");
+      } else {
+        await createTicket({
+          title: form.title.trim(),
+          description: form.description.trim() || undefined,
+          priority: form.priority,
+          lead_id: form.lead_id.trim() || undefined,
+          sla_hours: form.sla_hours ? Number(form.sla_hours) : undefined,
+          assigned_to: form.assigned_to === "unassigned" ? undefined : (form.assigned_to || undefined),
+        });
+        toast.success("Ticket created");
+      }
       setOpen(false);
-      reset();
+      if (!ticket) reset();
       router.refresh();
     } catch {
-      toast.error("Failed to create ticket");
+      toast.error(ticket ? "Failed to update ticket" : "Failed to create ticket");
     } finally {
       setLoading(false);
     }
@@ -72,14 +94,20 @@ export function TicketFormDialog({ members }: TicketFormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
       <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus className="h-4 w-4" />
-          New Ticket
-        </Button>
+        {ticket ? (
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors">
+            <Pencil className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button size="sm">
+            <Plus className="h-4 w-4" />
+            New Ticket
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-md overflow-y-auto max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>New Support Ticket</DialogTitle>
+          <DialogTitle>{ticket ? `Edit Ticket ${ticket.ticket_number}` : "New Support Ticket"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -116,21 +144,23 @@ export function TicketFormDialog({ members }: TicketFormDialogProps) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>SLA Hours</Label>
-              <Input
-                type="number"
-                min="1"
-                placeholder="e.g. 24"
-                value={form.sla_hours}
-                onChange={(e) => setForm({ ...form, sla_hours: e.target.value })}
-              />
-            </div>
+            {!ticket && (
+              <div className="space-y-2">
+                <Label>SLA Hours</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="e.g. 24"
+                  value={form.sla_hours}
+                  onChange={(e) => setForm({ ...form, sla_hours: e.target.value })}
+                />
+              </div>
+            )}
           </div>
           
           <div className="space-y-2">
             <Label>Assign To</Label>
-            <Select value={form.assigned_to} onValueChange={(v) => setForm({ ...form, assigned_to: v })}>
+            <Select value={form.assigned_to || "unassigned"} onValueChange={(v) => setForm({ ...form, assigned_to: v })}>
               <SelectTrigger>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-muted-foreground" />
@@ -148,21 +178,23 @@ export function TicketFormDialog({ members }: TicketFormDialogProps) {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label>Lead ID (optional)</Label>
-            <Input
-              placeholder="Paste lead ID to link"
-              value={form.lead_id}
-              onChange={(e) => setForm({ ...form, lead_id: e.target.value })}
-            />
-          </div>
+          {!ticket && (
+            <div className="space-y-2">
+              <Label>Lead ID (optional)</Label>
+              <Input
+                placeholder="Paste lead ID to link"
+                value={form.lead_id}
+                onChange={(e) => setForm({ ...form, lead_id: e.target.value })}
+              />
+            </div>
+          )}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !form.title.trim()}>
               {loading && <Loader2 className="animate-spin h-4 w-4" />}
-              Create Ticket
+              {ticket ? "Update Ticket" : "Create Ticket"}
             </Button>
           </DialogFooter>
         </form>

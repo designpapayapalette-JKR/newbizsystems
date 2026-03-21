@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, CalendarPlus, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, CalendarPlus, Trash2, CheckCircle2, XCircle, Pencil } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 interface Holiday {
@@ -104,36 +104,84 @@ export function HolidaysList({ initialHolidays }: HolidaysListProps) {
           ) : (
             <div className="divide-y border rounded-md">
               {initialHolidays.map((h) => (
-                <div key={h.id} className={`flex items-center justify-between p-3 text-sm ${!h.is_active && 'opacity-60 bg-gray-50'}`}>
-                  <div className="flex flex-col">
-                    <span className="font-medium flex items-center gap-2">
-                      {h.name}
-                      {h.is_active ? <CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground" />}
-                    </span>
-                    <span className="text-muted-foreground text-xs">{formatDate(h.date)}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Switch 
-                      checked={h.is_active} 
-                      onCheckedChange={() => handleToggle(h.id, h.is_active)} 
-                      disabled={loading || adding}
-                    />
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                      onClick={() => handleDelete(h.id)}
-                      disabled={loading || adding}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+                <HolidayRow key={h.id} holiday={h} loading={loading || adding} />
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function HolidayRow({ holiday: h, loading: globalLoading }: { holiday: Holiday, loading: boolean }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({ name: h.name, date: h.date });
+  const [loading, setLoading] = useState(false);
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { updateHrHoliday } = await import("@/actions/hr_settings");
+      await updateHrHoliday(h.id, formData);
+      toast.success("Holiday updated");
+      setIsEditing(false);
+    } catch {
+      toast.error("Failed to update holiday");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <form onSubmit={handleUpdate} className="flex gap-2 items-center p-2 bg-blue-50/50 border-b last:border-0 animate-in fade-in slide-in-from-top-1">
+        <Input size={32} className="h-8 py-1 text-sm flex-1" value={formData.name} onChange={(e) => setFormData(f => ({ ...f, name: e.target.value }))} autoFocus />
+        <Input type="date" className="h-8 py-1 text-sm w-36" value={formData.date} onChange={(e) => setFormData(f => ({ ...f, date: e.target.value }))} />
+        <Button type="submit" size="sm" disabled={loading} className="h-8 px-2">Save</Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setIsEditing(false)} disabled={loading} className="h-8 px-2">Cancel</Button>
+      </form>
+    );
+  }
+
+  return (
+    <div key={h.id} className={`flex items-center justify-between p-3 text-sm border-b last:border-0 ${!h.is_active && 'opacity-60 bg-gray-50'}`}>
+      <div className="flex flex-col">
+        <span className="font-medium flex items-center gap-2">
+          {h.name}
+          {h.is_active ? <CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground" />}
+        </span>
+        <span className="text-muted-foreground text-xs">{formatDate(h.date)}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch 
+          checked={h.is_active} 
+          onCheckedChange={async () => {
+             const { toggleHrHoliday } = await import("@/actions/hr_settings");
+             try { await toggleHrHoliday(h.id, !h.is_active); toast.success("Status updated"); }
+             catch { toast.error("Update failed"); }
+          }} 
+          disabled={globalLoading || loading}
+        />
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setIsEditing(true)} disabled={globalLoading || loading}>
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+          onClick={async () => {
+             if (!confirm("Remove holiday?")) return;
+             const { deleteHrHoliday } = await import("@/actions/hr_settings");
+             try { await deleteHrHoliday(h.id); toast.success("Holiday removed"); }
+             catch { toast.error("Delete failed"); }
+          }}
+          disabled={globalLoading || loading}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

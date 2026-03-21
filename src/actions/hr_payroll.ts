@@ -167,3 +167,23 @@ export async function finalizePayroll(id: string) {
   if (error) throw error;
   revalidatePath("/ERP/hr/payroll");
 }
+
+export async function updatePayrollRecord(id: string, data: any) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("hr_payroll")
+    .update(data)
+    .eq("id", id);
+  if (error) throw error;
+  revalidatePath("/ERP/hr/payroll");
+}
+
+export async function deletePayrollRecord(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("hr_payroll")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
+  revalidatePath("/ERP/hr/payroll");
+}

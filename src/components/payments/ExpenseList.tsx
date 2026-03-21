@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { createExpense, deleteExpense } from "@/actions/expenses";
+import { createExpense, deleteExpense, updateExpense } from "@/actions/expenses";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Receipt } from "lucide-react";
+import { Plus, Trash2, Receipt, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -22,6 +22,7 @@ export function ExpenseList({ initialExpenses }: ExpenseListProps) {
   const [expenses, setExpenses] = useState(initialExpenses);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<any>(null);
   
   const [formData, setFormData] = useState({
     category: "Others",
@@ -30,7 +31,31 @@ export function ExpenseList({ initialExpenses }: ExpenseListProps) {
     description: ""
   });
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setEditingExpense(null);
+      setFormData({
+        category: "Others",
+        amount: 0,
+        date: format(new Date(), "yyyy-MM-dd"),
+        description: ""
+      });
+    }
+  };
+
+  const startEdit = (expense: any) => {
+    setEditingExpense(expense);
+    setFormData({
+      category: expense.category,
+      amount: expense.amount,
+      date: format(new Date(expense.date), "yyyy-MM-dd"),
+      description: expense.description || ""
+    });
+    setOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.amount <= 0) {
         toast.error("Please enter a valid amount");
@@ -38,13 +63,17 @@ export function ExpenseList({ initialExpenses }: ExpenseListProps) {
     }
     setLoading(true);
     try {
-      await createExpense(formData);
-      toast.success("Expense logged successfully");
+      if (editingExpense) {
+        await updateExpense(editingExpense.id, formData);
+        toast.success("Expense updated");
+      } else {
+        await createExpense(formData);
+        toast.success("Expense logged successfully");
+      }
       setOpen(false);
-      // We rely on revalidatePath via the server action, but for absolute safety in UI:
       window.location.reload(); 
     } catch (err: any) {
-      toast.error(err.message || "Failed to log expense");
+      toast.error(err.message || "Failed to save expense");
     } finally {
       setLoading(false);
     }
@@ -67,15 +96,15 @@ export function ExpenseList({ initialExpenses }: ExpenseListProps) {
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Receipt className="h-5 w-5" /> Recent Expenses
         </h2>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
             <Button size="sm"><Plus className="h-4 w-4 mr-2" /> Log Expense</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Log New Expense</DialogTitle>
+              <DialogTitle>{editingExpense ? "Edit Expense" : "Log New Expense"}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-4 pt-4">
+            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
               <div className="space-y-1.5">
                 <Label>Category</Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
@@ -103,7 +132,7 @@ export function ExpenseList({ initialExpenses }: ExpenseListProps) {
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={loading} className="w-full">
-                  {loading ? "Logging..." : "Log Expense"}
+                  {loading ? "Saving..." : editingExpense ? "Update Expense" : "Log Expense"}
                 </Button>
               </DialogFooter>
             </form>
@@ -120,7 +149,7 @@ export function ExpenseList({ initialExpenses }: ExpenseListProps) {
                 <TableHead>Category</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="w-10"></TableHead>
+                <TableHead className="w-16"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -144,9 +173,14 @@ export function ExpenseList({ initialExpenses }: ExpenseListProps) {
                       ₹{Number(expense.amount).toLocaleString("en-IN")}
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(expense.id)} className="h-8 w-8 text-muted-foreground hover:text-red-600">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => startEdit(expense)} className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(expense.id)} className="h-8 w-8 text-muted-foreground hover:text-red-600 transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

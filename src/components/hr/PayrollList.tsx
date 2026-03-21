@@ -7,8 +7,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Download, CheckCircle, RefreshCcw } from "lucide-react";
+import { Loader2, Download, CheckCircle, RefreshCcw, Pencil, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 interface PayrollListProps {
   records: any[];
@@ -123,14 +125,31 @@ export function PayrollList({ records, selectedMonth }: PayrollListProps) {
                       {formatCurrency(row.net_payable)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1">
                         {!isPaid && (
-                          <Button size="sm" variant="ghost" onClick={() => handleFinalize(row.id)} className="text-blue-600 hover:text-blue-800">
-                            <CheckCircle className="h-4 w-4 mr-1" /> Finalize
-                          </Button>
+                          <>
+                            <Button size="sm" variant="ghost" onClick={() => handleFinalize(row.id)} className="text-blue-600 hover:text-blue-800" title="Finalize">
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                            <PayrollEditDialog record={row} trigger={
+                              <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-primary" title="Edit Draft">
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            } />
+                            <Button size="sm" variant="ghost" onClick={async () => {
+                              if (!confirm("Delete this payroll draft?")) return;
+                              try {
+                                const { deletePayrollRecord } = await import("@/actions/hr_payroll");
+                                await deletePayrollRecord(row.id);
+                                toast.success("Draft deleted");
+                              } catch { toast.error("Delete failed"); }
+                            }} className="text-muted-foreground hover:text-destructive" title="Delete Draft">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
-                        <Button size="sm" variant="outline" onClick={() => handleDownloadSlip(row.id, row.employee?.first_name)}>
-                          <Download className="h-4 w-4 mr-1" /> Slip
+                        <Button size="sm" variant="outline" onClick={() => handleDownloadSlip(row.id, row.employee?.first_name)} title="Download Slip">
+                          <Download className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -142,5 +161,55 @@ export function PayrollList({ records, selectedMonth }: PayrollListProps) {
         </Table>
       </div>
     </div>
+  );
+}
+
+function PayrollEditDialog({ record, trigger }: { record: any; trigger: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    gross_salary: record.gross_salary,
+    pf_deduction: record.pf_deduction,
+    esi_deduction: record.esi_deduction,
+    pt_deduction: record.pt_deduction,
+    tds_deduction: record.tds_deduction,
+  });
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { updatePayrollRecord } = await import("@/actions/hr_payroll");
+      const netPayable = Number(form.gross_salary) - Number(form.pf_deduction) - Number(form.esi_deduction) - Number(form.pt_deduction) - Number(form.tds_deduction);
+      await updatePayrollRecord(record.id, { ...form, net_payable: netPayable });
+      toast.success("Payroll record updated");
+      setOpen(false);
+    } catch {
+      toast.error("Failed to update record");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Edit Payroll Draft — {record.employee?.first_name}</DialogTitle></DialogHeader>
+        <form onSubmit={handleUpdate} className="space-y-4 pt-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2"><Label>Gross Salary</Label><Input type="number" value={form.gross_salary} onChange={(e) => setForm({...form, gross_salary: e.target.value})} /></div>
+            <div className="space-y-2"><Label>PF Deduction</Label><Input type="number" value={form.pf_deduction} onChange={(e) => setForm({...form, pf_deduction: e.target.value})} /></div>
+            <div className="space-y-2"><Label>ESI Deduction</Label><Input type="number" value={form.esi_deduction} onChange={(e) => setForm({...form, esi_deduction: e.target.value})} /></div>
+            <div className="space-y-2"><Label>PT Deduction</Label><Input type="number" value={form.pt_deduction} onChange={(e) => setForm({...form, pt_deduction: e.target.value})} /></div>
+            <div className="space-y-2"><Label>TDS Deduction</Label><Input type="number" value={form.tds_deduction} onChange={(e) => setForm({...form, tds_deduction: e.target.value})} /></div>
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
+            Save Changes
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

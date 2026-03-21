@@ -4,6 +4,7 @@ import { getTickets } from "@/actions/tickets";
 import { getTeamMembers } from "@/actions/team";
 import { TopBar } from "@/components/layout/TopBar";
 import { TicketFormDialog } from "@/components/tickets/TicketFormDialog";
+import { DeleteTicketButton } from "@/components/tickets/DeleteTicketButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -154,6 +155,10 @@ export default async function TicketsPage({
                     >
                       {ticket.status.replace("_", " ")}
                     </Badge>
+                    <div className="flex items-center gap-1 border-l pl-3 ml-1" onClick={(e) => e.preventDefault()}>
+                      <TicketFormDialog members={members} ticket={ticket} />
+                      <DeleteTicketButton id={ticket.id} ticketNumber={ticket.ticket_number} />
+                    </div>
                   </div>
                 </div>
               </Link>

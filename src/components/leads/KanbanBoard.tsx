@@ -11,11 +11,15 @@ import { updateLeadStage } from "@/actions/leads";
 import type { Lead, PipelineStage } from "@/types";
 import { formatCurrency, formatRelative, encodeWhatsAppMessage } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Phone, Mail, MessageCircle, Calendar, GripVertical, Bell } from "lucide-react";
+import {
+  Building2, Phone, Mail, MessageCircle, Calendar, GripVertical, Bell, Pencil, Trash2
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createReminder } from "@/actions/reminders";
 import { toast } from "sonner";
+import { LeadFormDialog } from "./LeadFormDialog";
+import { LeadDeleteButton } from "./LeadDeleteButton";
 
 const PRIORITY_BADGE: Record<string, string> = {
   hot: "🔴",
@@ -23,8 +27,10 @@ const PRIORITY_BADGE: Record<string, string> = {
   cold: "🔵",
 };
 
-function LeadCard({ lead, isDragging, dragHandleProps }: {
+function LeadCard({ lead, stages, isAdmin, isDragging, dragHandleProps }: {
   lead: Lead;
+  stages: PipelineStage[];
+  isAdmin: boolean;
   isDragging?: boolean;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }) {
@@ -78,38 +84,63 @@ function LeadCard({ lead, isDragging, dragHandleProps }: {
           </div>
         )}
         <div className="flex items-center gap-1 pt-0.5">
-          {lead.phone && (
-            <>
+          <div className="flex items-center gap-0.5 border-r pr-1 mr-1">
+            {lead.phone && (
+              <>
+                <a
+                  href={`tel:${lead.phone}`}
+                  title="Call"
+                  className="p-1 rounded text-muted-foreground hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                >
+                  <Phone className="h-3 w-3" />
+                </a>
+                <a
+                  href={encodeWhatsAppMessage(lead.phone, `Hi ${lead.name}!`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="WhatsApp"
+                  className="p-1 rounded text-muted-foreground hover:text-green-600 hover:bg-green-50 transition-colors"
+                >
+                  <MessageCircle className="h-3 w-3" />
+                </a>
+              </>
+            )}
+            {lead.email && (
               <a
-                href={`tel:${lead.phone}`}
-                title="Call"
-                className="p-1 rounded text-muted-foreground hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                href={`mailto:${lead.email}`}
+                title="Email"
+                className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
               >
-                <Phone className="h-3.5 w-3.5" />
+                <Mail className="h-3 w-3" />
               </a>
-              <a
-                href={encodeWhatsAppMessage(lead.phone, `Hi ${lead.name}!`)}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="WhatsApp"
-                className="p-1 rounded text-muted-foreground hover:text-green-600 hover:bg-green-50 transition-colors"
-              >
-                <MessageCircle className="h-3.5 w-3.5" />
-              </a>
-            </>
-          )}
-          {lead.email && (
-            <a
-              href={`mailto:${lead.email}`}
-              title="Email"
-              className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-            >
-              <Mail className="h-3.5 w-3.5" />
-            </a>
-          )}
+            )}
+          </div>
+          
+          <div className="flex items-center gap-0.5" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+            <LeadFormDialog 
+              stages={stages} 
+              lead={lead} 
+              trigger={
+                <button className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Edit">
+                  <Pencil className="h-3 w-3" />
+                </button>
+              } 
+            />
+            {isAdmin && (
+              <LeadDeleteButton 
+                leadId={lead.id} 
+                trigger={
+                  <button className="p-1 rounded text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors" title="Delete/Archive">
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                } 
+              />
+            )}
+          </div>
+
           <Link
             href={`/ERP/leads/${lead.id}`}
-            className="ml-auto text-xs text-primary hover:underline"
+            className="ml-auto text-xs text-primary hover:underline hover:text-blue-700"
           >
             Open →
           </Link>
@@ -129,7 +160,7 @@ function LeadCard({ lead, isDragging, dragHandleProps }: {
               }
             }}
           >
-            <Bell className="h-3.5 w-3.5" />
+            <Bell className="h-3 w-3" />
           </button>
         </div>
       </div>
@@ -137,7 +168,7 @@ function LeadCard({ lead, isDragging, dragHandleProps }: {
   );
 }
 
-function SortableLeadCard({ lead }: { lead: Lead }) {
+function SortableLeadCard({ lead, stages, isAdmin }: { lead: Lead; stages: PipelineStage[]; isAdmin: boolean; }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: lead.id,
     data: { lead },
@@ -145,7 +176,7 @@ function SortableLeadCard({ lead }: { lead: Lead }) {
   const style = { transform: CSS.Transform.toString(transform), transition };
   return (
     <div ref={setNodeRef} style={style}>
-      <LeadCard lead={lead} isDragging={isDragging} dragHandleProps={{ ...attributes, ...listeners }} />
+      <LeadCard lead={lead} stages={stages} isAdmin={isAdmin} isDragging={isDragging} dragHandleProps={{ ...attributes, ...listeners }} />
     </div>
   );
 }
@@ -165,9 +196,10 @@ function DroppableColumn({ stageId, children }: { stageId: string; children: Rea
 interface KanbanBoardProps {
   stages: PipelineStage[];
   leads: Lead[];
+  isAdmin: boolean;
 }
 
-export function KanbanBoard({ stages, leads }: KanbanBoardProps) {
+export function KanbanBoard({ stages, leads, isAdmin }: KanbanBoardProps) {
   const router = useRouter();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [localLeads, setLocalLeads] = useState(leads);
@@ -237,7 +269,7 @@ export function KanbanBoard({ stages, leads }: KanbanBoardProps) {
               <DroppableColumn stageId={stage.id}>
                 <SortableContext items={stageLeads.map((l) => l.id)} strategy={verticalListSortingStrategy}>
                   {stageLeads.map((lead) => (
-                    <SortableLeadCard key={lead.id} lead={lead} />
+                    <SortableLeadCard key={lead.id} lead={lead} stages={stages} isAdmin={isAdmin} />
                   ))}
                 </SortableContext>
               </DroppableColumn>
@@ -246,7 +278,7 @@ export function KanbanBoard({ stages, leads }: KanbanBoardProps) {
         })}
       </div>
       <DragOverlay>
-        {activeLead && <LeadCard lead={activeLead} />}
+        {activeLead && <LeadCard lead={activeLead} stages={stages} isAdmin={isAdmin} />}
       </DragOverlay>
     </DndContext>
   );

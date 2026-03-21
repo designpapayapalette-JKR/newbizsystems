@@ -55,6 +55,17 @@ export async function addHrHoliday(data: { name: string; date: string; is_active
   revalidatePath("/ERP/hr/settings");
 }
 
+export async function updateHrHoliday(id: string, data: { name: string; date: string }) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("hr_holidays")
+    .update(data)
+    .eq("id", id);
+
+  if (error) throw error;
+  revalidatePath("/ERP/hr/settings");
+}
+
 export async function toggleHrHoliday(id: string, is_active: boolean) {
   const supabase = await createClient();
   const { error } = await supabase

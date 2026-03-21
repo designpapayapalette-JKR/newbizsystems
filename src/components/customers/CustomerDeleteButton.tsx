@@ -5,16 +5,11 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { deleteLead } from "@/actions/leads";
+import { deleteCustomer } from "@/actions/customers";
 import { toast } from "sonner";
 import { Trash2, Loader2 } from "lucide-react";
 
-interface LeadDeleteButtonProps {
-  leadId: string;
-  trigger?: React.ReactNode;
-}
-
-export function LeadDeleteButton({ leadId, trigger }: LeadDeleteButtonProps) {
+export function CustomerDeleteButton({ customerId, trigger }: { customerId: string; trigger?: React.ReactNode }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,16 +17,12 @@ export function LeadDeleteButton({ leadId, trigger }: LeadDeleteButtonProps) {
   async function handleDelete() {
     setLoading(true);
     try {
-      await deleteLead(leadId);
-      toast.success("Lead deleted");
+      await deleteCustomer(customerId);
+      toast.success("Customer archived");
       setOpen(false);
       router.refresh();
-      // Only redirect if we are on the lead detail page
-      if (window.location.pathname.includes(`/leads/${leadId}`)) {
-        router.push("/ERP/leads");
-      }
     } catch {
-      toast.error("Failed to delete lead");
+      toast.error("Failed to archive customer");
       setLoading(false);
     }
   }
@@ -42,15 +33,15 @@ export function LeadDeleteButton({ leadId, trigger }: LeadDeleteButtonProps) {
         {trigger ?? (
           <Button size="sm" variant="destructive">
             <Trash2 className="h-4 w-4" />
-            Delete
+            Archive
           </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Lead</DialogTitle>
+          <DialogTitle>Archive Customer</DialogTitle>
           <DialogDescription>
-            This will archive the lead and remove it from your pipeline. You can still find it in the "Archived" section.
+            This will mark the customer as archived. They will still remain in your records but will be filtered by default.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -59,7 +50,7 @@ export function LeadDeleteButton({ leadId, trigger }: LeadDeleteButtonProps) {
           </Button>
           <Button variant="destructive" onClick={handleDelete} disabled={loading}>
             {loading && <Loader2 className="animate-spin h-4 w-4 mr-2" />}
-            Delete Lead
+            Archive Customer
           </Button>
         </DialogFooter>
       </DialogContent>

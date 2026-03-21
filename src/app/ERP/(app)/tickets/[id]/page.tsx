@@ -7,6 +7,8 @@ import { TopBar } from "@/components/layout/TopBar";
 import { TicketStatusSelect } from "@/components/tickets/TicketStatusSelect";
 import { TicketAssignSelect } from "@/components/tickets/TicketAssignSelect";
 import { TicketCommentForm } from "@/components/tickets/TicketCommentForm";
+import { TicketFormDialog } from "@/components/tickets/TicketFormDialog";
+import { DeleteTicketButton } from "@/components/tickets/DeleteTicketButton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, ClockAlert } from "lucide-react";
@@ -62,7 +64,12 @@ export default async function TicketDetailPage({
 
   return (
     <div className="flex flex-col h-full">
-      <TopBar title={ticket.ticket_number} />
+      <TopBar title={ticket.ticket_number}>
+        <div className="flex items-center gap-1">
+          <TicketFormDialog members={members} ticket={ticket} />
+          <DeleteTicketButton id={ticket.id} ticketNumber={ticket.ticket_number} />
+        </div>
+      </TopBar>
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 pt-4">

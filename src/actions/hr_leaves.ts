@@ -90,6 +90,13 @@ export async function getLeaveBalances(employeeId?: string) {
   return data || [];
 }
 
+export async function updateLeaveRequest(id: string, data: Partial<{ type: string; start_date: string; end_date: string; reason: string }>) {
+  const { supabase } = await getOrgId();
+  const { error } = await supabase.from("hr_leaves").update(data).eq("id", id).eq("status", "pending");
+  if (error) throw error;
+  revalidatePath("/ERP/hr/leaves");
+}
+
 export async function deleteLeave(leaveId: string) {
   const { supabase } = await getOrgId();
   const { error } = await supabase.from("hr_leaves").delete().eq("id", leaveId);
