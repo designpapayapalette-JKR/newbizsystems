@@ -81,3 +81,21 @@ export function toE164(phone: string): string {
   if (!digits.startsWith("91") && digits.length === 10) return `+91${digits}`;
   return `+${digits}`;
 }
+
+/**
+ * Returns the base application URL for redirects and absolute links.
+ * Prioritizes NEXT_PUBLIC_APP_URL, then Vercel's deployment URL, 
+ * and finally falls back to the live production domain.
+ */
+export function getURL() {
+  let url =
+    process?.env?.NEXT_PUBLIC_APP_URL ??
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+    "https://newbizsystems.online";
+
+  // Make sure to include `https://` when not localhost.
+  url = url.includes("http") ? url : `https://${url}`;
+  // Remove trailing slash if present for consistency.
+  url = url.endsWith("/") ? url.slice(0, -1) : url;
+  return url;
+}

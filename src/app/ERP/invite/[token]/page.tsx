@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { acceptInvite } from "@/actions/team";
 import { createClient } from "@/lib/supabase/client";
+import { getURL } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -88,7 +89,7 @@ export default function InvitePage() {
     }
     setLoading(true);
     const supabase = createClient();
-    const appUrl = window.location.origin;
+    const appUrl = getURL();
 
     const { data, error } = await supabase.auth.signUp({
       email: signupEmail,
